@@ -2,9 +2,9 @@
 <html lang="zh-Hant">
 <head>
 <meta charset="utf-8">
-<meta name="viewport" content="width=device-width,initial-scale=1">
-<meta name="theme-color" content="#111">
-<title>日文單字卡｜免費自動完成</title>
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<meta name="theme-color" content="#111111">
+<title>日文 N5 1000 單字卡</title>
 <style>
 *{box-sizing:border-box}
 body{margin:0;background:#f5f5f7;color:#222;font-family:-apple-system,BlinkMacSystemFont,"Noto Sans TC","Noto Sans JP",sans-serif}
@@ -12,33 +12,25 @@ body{margin:0;background:#f5f5f7;color:#222;font-family:-apple-system,BlinkMacSy
 h1{font-size:27px;margin:4px 0}.sub{color:#777;margin:0 0 16px}
 .tabs,.row,.levels{display:flex;gap:8px;margin:10px 0}
 button{border:0;border-radius:13px;padding:13px;font-size:16px;font-weight:700}
-.tab{flex:1;background:#e6e6eb}.active,.dark{background:#111;color:#fff}
-.light{background:#e7e7ec}.ai{background:#eee9ff;color:#4d2e9b}
+.tab{flex:1;background:#e6e6eb}.active,.dark{background:#111;color:#fff}.light{background:#e7e7ec}
 .panel,.card{background:#fff;border-radius:22px;padding:20px;box-shadow:0 7px 26px #0001;margin-bottom:14px}
-label{display:block;font-weight:700;margin:12px 0 6px}
-input,textarea{width:100%;border:1px solid #d8d8dc;border-radius:12px;padding:12px;font-size:16px}
-textarea{min-height:72px}
-.wide{width:100%;margin-top:12px}
-.note{background:#f7f2ff;border-radius:12px;padding:12px;color:#5b477e;font-size:14px;line-height:1.55;margin-top:10px}
-.msg{text-align:center;color:#666;min-height:24px;margin-top:10px}
-.count{color:#777;font-size:14px;margin:8px 0}
 .card{min-height:410px;display:flex;flex-direction:column;justify-content:center;text-align:center;cursor:pointer}
 .jp{font-size:44px;font-weight:800}.reading{font-size:19px;color:#777;margin:6px 0 20px}
-.meaning{font-size:25px;font-weight:700;margin-bottom:20px}
-.ex{border-top:1px solid #eee;padding-top:17px;text-align:left}
+.meaning{font-size:25px;font-weight:700;margin-bottom:20px}.ex{border-top:1px solid #eee;padding-top:17px;text-align:left}
 .ej{font-size:19px;line-height:1.65}.ec{color:#666;line-height:1.65;margin-top:4px}
-.hint{color:#999}.hidden{display:none}
-.row button,.levels button{flex:1}
-.level1{background:#ffe2e2}.level2{background:#fff0cf}.level3{background:#e0f5e7}
-.item{padding:13px 0;border-bottom:1px solid #eee;line-height:1.5}
-.item b{font-size:18px}.small{color:#777;font-size:14px}
-.delete{float:right;background:#ffe0e0;padding:7px 10px;font-size:13px}
+.hint{color:#999}.hidden{display:none}.row button,.levels button{flex:1}
+.count,.msg,.small{color:#777;font-size:14px}.item{padding:12px 0;border-bottom:1px solid #eee;line-height:1.5}
+.item b{font-size:18px}input,textarea{width:100%;border:1px solid #d8d8dc;border-radius:12px;padding:12px;font-size:16px}
+textarea{min-height:70px}label{display:block;font-weight:700;margin:12px 0 6px}.wide{width:100%;margin-top:12px}
+.note{background:#f7f2ff;padding:12px;border-radius:12px;color:#5d4a7a;font-size:14px;line-height:1.5}
+#error{display:none;background:#fff0f0;color:#9b2226;border-radius:14px;padding:14px;margin:12px 0;line-height:1.5}
 </style>
 </head>
 <body>
 <div class="app">
-<h1>日文單字卡 🇯🇵</h1>
-<p class="sub">免費版｜輸入日文，快速完成常見單字資料</p>
+<h1>日文 N5 單字卡 🇯🇵</h1>
+<p class="sub">1000 筆 N5 程度初學詞彙／表達</p>
+<div id="error"></div>
 
 <div class="tabs">
 <button id="studyTab" class="tab active" onclick="showTab('study')">📖 背單字</button>
@@ -46,9 +38,9 @@ textarea{min-height:72px}
 </div>
 
 <section id="study">
-<div class="count" id="count"></div>
+<div class="count" id="count">正在載入單字…</div>
 <div class="card" onclick="flip()">
-<div class="jp" id="jp"></div>
+<div class="jp" id="jp">載入中…</div>
 <div class="reading" id="reading"></div>
 <div id="answer" class="hidden">
 <div class="meaning" id="meaning"></div>
@@ -62,150 +54,110 @@ textarea{min-height:72px}
 </div>
 <div class="row">
 <button class="light" onclick="shuffle()">🔀 隨機</button>
-<button class="light" onclick="speakReading()">🔊 念讀音</button>
+<button class="light" onclick="speak()">🔊 念讀音</button>
 </div>
 <div class="levels">
-<button class="level1" onclick="rate('不熟')">😵 不熟</button>
-<button class="level2" onclick="rate('普通')">😐 普通</button>
-<button class="level3" onclick="rate('熟悉')">😊 熟悉</button>
+<button style="background:#ffe2e2" onclick="rate('不熟')">😵 不熟</button>
+<button style="background:#fff0cf" onclick="rate('普通')">😐 普通</button>
+<button style="background:#e0f5e7" onclick="rate('熟悉')">😊 熟悉</button>
 </div>
 </section>
 
 <section id="add" class="hidden">
 <div class="panel">
-<label>日文單字 *</label>
-<input id="jpInput" placeholder="例如：旅行">
-
-<button class="ai wide" onclick="autoComplete()">✨ 免費自動完成</button>
-
-<div class="note">
-這是免費版：內建常用日文資料庫。輸入資料庫裡的單字後，會自動填入假名、中文、日文例句和中文例句，不需要 API Key。
-</div>
-
-<label>讀音／假名 *</label>
-<input id="rInput" placeholder="例如：りょこう">
-
-<label>中文意思 *</label>
-<input id="mInput" placeholder="例如：旅行">
-
-<label>日文例句</label>
-<textarea id="ejInput" placeholder="例如：来月、日本へ旅行に行きます。"></textarea>
-
-<label>中文例句</label>
-<textarea id="ecInput" placeholder="例如：下個月我要去日本旅行。"></textarea>
-
+<label>日文</label><input id="newjp" placeholder="例如：猫">
+<label>讀音／假名</label><input id="newr" placeholder="例如：ねこ">
+<label>中文意思</label><input id="newm" placeholder="例如：貓">
+<label>日文例句</label><textarea id="newej" placeholder="例如：猫がいます。"></textarea>
+<label>中文例句</label><textarea id="newec" placeholder="例如：有一隻貓。"></textarea>
 <button class="dark wide" onclick="addWord()">＋ 加入單字卡</button>
 <div class="msg" id="msg"></div>
+<div class="note">這個版本不需要 API、不需要付費。內建 1000 筆資料。資料會儲存在你的瀏覽器。</div>
 </div>
-
-<div class="panel">
-<b>📚 我的單字</b>
-<div id="list"></div>
-</div>
+<div class="panel"><b>📚 單字總數：<span id="total">0</span></b><div id="list"></div></div>
 </section>
 </div>
 
 <script>
-const builtin=[
-["勉強","べんきょう","學習、讀書","毎日、日本語を勉強しています。","我每天都在學日文。"],
-["大切","たいせつ","重要、珍貴","家族との時間は大切です。","和家人相處的時間很重要。"],
-["楽しい","たのしい","快樂、有趣","日本語の勉強は楽しいです。","學日文很有趣。"],
-["難しい","むずかしい","困難","この漢字は難しいです。","這個漢字很難。"],
-["簡単","かんたん","簡單","この問題は簡単です。","這個問題很簡單。"],
-["旅行","りょこう","旅行","来月、日本へ旅行に行きます。","下個月我要去日本旅行。"],
-["約束","やくそく","約定、約會","友達と会う約束があります。","我和朋友有約。"],
-["準備","じゅんび","準備","旅行の準備をしています。","我正在準備旅行。"],
-["必要","ひつよう","必要、需要","パスポートが必要です。","需要護照。"],
-["便利","べんり","方便","このアプリはとても便利です。","這個 App 非常方便。"],
-["忘れる","わすれる","忘記","宿題を忘れないでください。","請不要忘記作業。"],
-["食べる","たべる","吃","朝ごはんを食べます。","我吃早餐。"],
-["飲む","のむ","喝","水を飲みます。","我喝水。"],
-["見る","みる","看","映画を見ます。","我看電影。"],
-["行く","いく","去","明日、学校へ行きます。","明天去學校。"],
-["来る","くる","來","友達が家に来ます。","朋友會來我家。"],
-["帰る","かえる","回去、回家","六時に家へ帰ります。","六點回家。"],
-["話す","はなす","說、談話","先生と日本語で話しました。","我用日文和老師說話。"],
-["聞く","きく","聽、詢問","音楽を聞いています。","我正在聽音樂。"],
-["読む","よむ","讀","本を読みます。","我讀書。"],
-["買う","かう","買","コンビニで水を買います。","我在便利商店買水。"],
-["好き","すき","喜歡","私は日本料理が好きです。","我喜歡日本料理。"],
-["嫌い","きらい","討厭、不喜歡","私は納豆が嫌いです。","我不喜歡納豆。"],
-["新しい","あたらしい","新的","新しい靴を買いました。","我買了新鞋。"],
-["古い","ふるい","舊的","これは古い写真です。","這是一張舊照片。"],
-["暑い","あつい","炎熱","今日はとても暑いです。","今天非常熱。"],
-["寒い","さむい","寒冷","今日は寒いですね。","今天很冷呢。"],
-["美味しい","おいしい","好吃、美味","このラーメンは美味しいです。","這碗拉麵很好吃。"],
-["元気","げんき","有精神、健康","元気ですか。","你還好嗎？"],
-["忙しい","いそがしい","忙碌","最近、とても忙しいです。","最近非常忙。"]
-];
+(function(){
+"use strict";
+var KEY="jpN5WordsStableV1", words=[], idx=0, flipped=false, ready=false;
 
-let words=JSON.parse(localStorage.getItem("jpFlashcardsFree")||"null") ||
-builtin.map(x=>({jp:x[0],r:x[1],m:x[2],ej:x[3],ec:x[4]}));
-let index=0,flipped=false;
+function $(id){return document.getElementById(id)}
+function error(msg){$("error").style.display="block";$("error").textContent="⚠️ "+msg}
+function save(){try{localStorage.setItem(KEY,JSON.stringify(words))}catch(e){}}
 
-function save(){localStorage.setItem("jpFlashcardsFree",JSON.stringify(words))}
 function render(){
- if(!words.length){count.textContent="目前沒有單字";return}
- const w=words[index];
- jp.textContent=w.jp;reading.textContent=w.r;meaning.textContent=w.m;ej.textContent=w.ej;ec.textContent=w.ec;
- count.textContent=`第 ${index+1} / ${words.length} 個${w.level?"｜ "+w.level:""}`;
- answer.classList.toggle("hidden",!flipped);hint.classList.toggle("hidden",flipped);
-}
-function flip(){if(words.length){flipped=!flipped;render()}}
-function next(){if(words.length){index=(index+1)%words.length;flipped=false;render()}}
-function prev(){if(words.length){index=(index-1+words.length)%words.length;flipped=false;render()}}
-function shuffle(){if(words.length){index=Math.floor(Math.random()*words.length);flipped=false;render()}}
-function speakReading(){
- if(!words.length)return;
- const u=new SpeechSynthesisUtterance(words[index].r);
- u.lang="ja-JP";u.rate=.85;speechSynthesis.cancel();speechSynthesis.speak(u);
-}
-function rate(level){if(!words.length)return;words[index].level=level;save();next()}
-
-function showTab(tab){
- study.classList.toggle("hidden",tab!=="study");
- add.classList.toggle("hidden",tab!=="add");
- studyTab.classList.toggle("active",tab==="study");
- addTab.classList.toggle("active",tab==="add");
- if(tab==="add")renderList();
+ if(!ready || !words.length)return;
+ var w=words[idx];
+ $("jp").textContent=w.jp||"";
+ $("reading").textContent=w.r||"";
+ $("meaning").textContent=w.m||"";
+ $("ej").textContent=w.ej||"";
+ $("ec").textContent=w.ec||"";
+ $("count").textContent="第 "+(idx+1)+" / "+words.length+" 個"+(w.level?"｜ "+w.level:"");
+ $("answer").classList.toggle("hidden",!flipped);
+ $("hint").classList.toggle("hidden",flipped);
 }
 
-function autoComplete(){
- const key=jpInput.value.trim();
- if(!key){msg.textContent="請先輸入日文單字，例如：旅行";return}
- const w=builtin.find(x=>x[0]===key);
- if(!w){
-   msg.textContent="目前免費資料庫沒有「"+key+"」。你可以先手動填寫；要支援任意新單字，需要另外接 AI 服務。";
-   return;
- }
- rInput.value=w[1];mInput.value=w[2];ejInput.value=w[3];ecInput.value=w[4];
- msg.textContent="✨ 已自動完成「"+key+"」！";
-}
+window.flip=function(){if(ready){flipped=!flipped;render()}};
+window.next=function(){if(ready){idx=(idx+1)%words.length;flipped=false;render()}};
+window.prev=function(){if(ready){idx=(idx-1+words.length)%words.length;flipped=false;render()}};
+window.shuffle=function(){if(ready){idx=Math.floor(Math.random()*words.length);flipped=false;render()}};
+window.speak=function(){
+ if(!ready)return;
+ var u=new SpeechSynthesisUtterance(words[idx].r||words[idx].jp);
+ u.lang="ja-JP";u.rate=.85;
+ if(window.speechSynthesis){speechSynthesis.cancel();speechSynthesis.speak(u)}
+};
+window.rate=function(x){if(ready){words[idx].level=x;save();window.next()}};
 
-function addWord(){
- const v=id=>document.getElementById(id).value.trim();
- if(!v("jpInput")||!v("rInput")||!v("mInput")){
-   msg.textContent="請至少填寫日文、讀音和中文意思。";return
- }
- words.push({jp:v("jpInput"),r:v("rInput"),m:v("mInput"),ej:v("ejInput"),ec:v("ecInput")});
- index=words.length-1;flipped=false;save();render();renderList();
- ["jpInput","rInput","mInput","ejInput","ecInput"].forEach(id=>document.getElementById(id).value="");
- msg.textContent="✅ 已加入單字卡！";
-}
+window.showTab=function(x){
+ $("study").classList.toggle("hidden",x!=="study");
+ $("add").classList.toggle("hidden",x!=="add");
+ $("studyTab").classList.toggle("active",x==="study");
+ $("addTab").classList.toggle("active",x==="add");
+ if(x==="add")renderList();
+};
+
+window.addWord=function(){
+ var v=function(id){return $(id).value.trim()};
+ if(!v("newjp")||!v("newr")||!v("newm")){$("msg").textContent="請填寫日文、讀音、中文意思";return}
+ words.push({jp:v("newjp"),r:v("newr"),m:v("newm"),ej:v("newej"),ec:v("newec"),level:""});
+ save();idx=words.length-1;flipped=false;render();renderList();
+ ["newjp","newr","newm","newej","newec"].forEach(function(id){$(id).value=""});
+ $("msg").textContent="✅ 已加入單字卡！";
+};
+
 function renderList(){
- list.innerHTML=words.map((w,n)=>`
- <div class="item">
- <button class="delete" onclick="deleteWord(${n})">刪除</button>
- <b>${w.jp}</b> <span class="small">${w.r}</span><br>
- <span class="small">${w.m}</span>${w.level?`<br><span class="small">程度：${w.level}</span>`:""}
- </div>`).join("");
+ $("total").textContent=words.length;
+ var arr=words.slice(-30).reverse();
+ $("list").innerHTML=arr.map(function(w){
+   return '<div class="item"><b>'+escapeHtml(w.jp)+'</b> <span class="small">'+escapeHtml(w.r)+'</span><br><span class="small">'+escapeHtml(w.m)+'</span></div>';
+ }).join("");
 }
-function deleteWord(n){
- if(confirm("確定刪除「"+words[n].jp+"」嗎？")){
-  words.splice(n,1);index=Math.min(index,Math.max(0,words.length-1));save();render();renderList();
- }
+function escapeHtml(s){
+ return String(s).replace(/[&<>"']/g,function(c){return {"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#039;"}[c]});
 }
-render();
+
+function start(seed){
+ try{
+   var saved=null;
+   try{saved=JSON.parse(localStorage.getItem(KEY)||"null")}catch(e){}
+   if(Array.isArray(saved)&&saved.length>=1000)words=saved;
+   else{words=seed.slice();save()}
+   ready=true;idx=0;flipped=false;render();
+ }catch(e){error("單字資料載入失敗："+e.message)}
+}
+
+fetch("n5_words.json",{cache:"no-store"})
+.then(function(r){
+ if(!r.ok)throw new Error("找不到 n5_words.json（請確認兩個檔案都有上傳到 GitHub）");
+ return r.json();
+})
+.then(start)
+.catch(function(e){error(e.message);$("jp").textContent="無法載入";$("count").textContent="請確認 index.html 與 n5_words.json 在同一個資料夾。"});
+})();
 </script>
 </body>
 </html>
