@@ -1,0 +1,94 @@
+<!doctype html>
+<html lang="zh-Hant">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<title>日文單字卡</title>
+<style>
+*{box-sizing:border-box} body{margin:0;background:#f5f5f7;color:#222;font-family:-apple-system,BlinkMacSystemFont,"Noto Sans TC","Noto Sans JP",sans-serif}
+.app{max-width:540px;margin:auto;min-height:100vh;padding:20px 16px 50px}
+h1{font-size:28px;margin:6px 0}.tabs{display:flex;gap:8px;margin:16px 0}
+button{border:0;border-radius:14px;padding:13px 15px;font-size:16px;font-weight:600}.tab{flex:1;background:#e5e5ea}.active{background:#222;color:white}
+.panel,.card{background:#fff;border-radius:22px;padding:20px;box-shadow:0 7px 25px #0001;margin-bottom:14px}
+label{display:block;font-weight:600;margin:12px 0 6px}input,textarea{width:100%;border:1px solid #ddd;border-radius:12px;padding:12px;font-size:16px}textarea{min-height:72px;resize:vertical}
+.add{width:100%;background:#222;color:#fff;margin-top:16px}.msg{color:#777;text-align:center;margin:10px}
+.card{min-height:400px;display:flex;flex-direction:column;justify-content:center;text-align:center}.jp{font-size:42px;font-weight:700}.reading{color:#777;font-size:18px;margin:7px 0 20px}.meaning{font-size:24px;font-weight:600;margin-bottom:24px}.ex{border-top:1px solid #eee;padding-top:18px;text-align:left}.ej{font-size:19px;line-height:1.6}.ec{color:#666;line-height:1.6}
+.row{display:flex;gap:8px;margin-top:14px}.row button{flex:1}.dark{background:#222;color:#fff}.gray{background:#e5e5ea}.danger{background:#ffe1e1}
+.count{color:#777;font-size:14px;margin:8px 0}.item{padding:13px 0;border-bottom:1px solid #eee}.item b{font-size:18px}.item small{color:#666}.delete{float:right;padding:7px 10px;font-size:13px}
+.hidden{display:none}
+</style>
+</head>
+<body>
+<div class="app">
+<h1>日文單字卡 🇯🇵</h1>
+<div class="tabs">
+<button id="studyTab" class="tab active" onclick="show('study')">📖 背單字</button>
+<button id="addTab" class="tab" onclick="show('add')">➕ 新增單字</button>
+</div>
+
+<section id="study">
+<div class="count" id="count"></div>
+<div class="card" onclick="flip()">
+<div class="jp" id="jp"></div><div class="reading" id="reading"></div>
+<div class="meaning hidden" id="meaning"></div>
+<div class="ex hidden" id="ex"><div class="ej" id="ej"></div><div class="ec" id="ec"></div></div>
+<p id="hint" style="color:#999">👆 點卡片查看中文與例句</p>
+</div>
+<div class="row">
+<button class="gray" onclick="prev()">← 上一個</button>
+<button class="dark" onclick="next()">下一個 →</button>
+</div>
+<div class="row"><button class="gray" onclick="shuffle()">🔀 隨機</button><button class="gray" onclick="speak()">🔊 發音</button></div>
+</section>
+
+<section id="add" class="hidden">
+<div class="panel">
+<label>日文單字</label><input id="fjp" placeholder="例：勉強">
+<label>讀音（假名）</label><input id="fr" placeholder="例：べんきょう">
+<label>中文意思</label><input id="fm" placeholder="例：學習、讀書">
+<label>日文例句</label><textarea id="fej" placeholder="例：毎日、日本語を勉強しています。"></textarea>
+<label>中文例句</label><textarea id="fec" placeholder="例：我每天都在學日文。"></textarea>
+<button class="add" onclick="addWord()">＋ 新增到單字卡</button>
+<div class="msg" id="msg"></div>
+</div>
+<div class="panel"><b>📚 我的單字</b><div id="list"></div></div>
+</section>
+</div>
+
+<script>
+const starter=[
+["勉強","べんきょう","學習、讀書","毎日、日本語を勉強しています。","我每天都在學日文。"],
+["大切","たいせつ","重要、珍貴","家族との時間は大切です。","和家人相處的時間很重要。"],
+["楽しい","たのしい","快樂、有趣","日本語の勉強は楽しいです。","學日文很有趣。"],
+["難しい","むずかしい","困難","この漢字は難しいです。","這個漢字很難。"],
+["簡単","かんたん","簡單","この問題は簡単です。","這個問題很簡單。"]
+];
+let words=JSON.parse(localStorage.getItem("jpWords")||"null")||starter.map(x=>({jp:x[0],r:x[1],m:x[2],ej:x[3],ec:x[4]}));
+let i=0, flipped=false;
+function save(){localStorage.setItem("jpWords",JSON.stringify(words))}
+function render(){
+ if(!words.length)return;
+ let w=words[i]; document.getElementById("jp").textContent=w.jp;document.getElementById("reading").textContent=w.r;
+ document.getElementById("meaning").textContent=w.m;document.getElementById("ej").textContent=w.ej;document.getElementById("ec").textContent=w.ec;
+ document.getElementById("count").textContent=`第 ${i+1} / ${words.length} 個`;
+ document.getElementById("hint").classList.toggle("hidden",flipped);document.getElementById("meaning").classList.toggle("hidden",!flipped);document.getElementById("ex").classList.toggle("hidden",!flipped);
+}
+function flip(){flipped=!flipped;render()} function next(){i=(i+1)%words.length;flipped=false;render()} function prev(){i=(i-1+words.length)%words.length;flipped=false;render()}
+function shuffle(){i=Math.floor(Math.random()*words.length);flipped=false;render()}
+function speak(){speechSynthesis.cancel();speechSynthesis.speak(new SpeechSynthesisUtterance(words[i].jp))}
+function show(x){document.getElementById("study").classList.toggle("hidden",x!=="study");document.getElementById("add").classList.toggle("hidden",x!=="add");document.getElementById("studyTab").classList.toggle("active",x==="study");document.getElementById("addTab").classList.toggle("active",x==="add");if(x==="add")renderList()}
+function addWord(){
+ const v=id=>document.getElementById(id).value.trim();
+ if(!v("fjp")||!v("fm")){document.getElementById("msg").textContent="請至少填寫「日文單字」和「中文意思」";return}
+ words.push({jp:v("fjp"),r:v("fr"),m:v("fm"),ej:v("fej"),ec:v("fec")});save();i=words.length-1;
+ ["fjp","fr","fm","fej","fec"].forEach(x=>document.getElementById(x).value="");
+ document.getElementById("msg").textContent="✅ 已新增！";renderList();render();
+}
+function renderList(){
+ document.getElementById("list").innerHTML=words.map((w,n)=>`<div class="item"><button class="danger delete" onclick="delWord(${n})">刪除</button><b>${w.jp}</b> <small>${w.r||""}</small><br><small>${w.m}</small></div>`).join("");
+}
+function delWord(n){if(confirm("確定刪除這個單字？")){words.splice(n,1);i=Math.min(i,Math.max(0,words.length-1));save();renderList();render()}}
+render();
+</script>
+</body>
+</html>
