@@ -3,235 +3,152 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
-<meta name="theme-color" content="#111">
-<title>日文 N5 單字卡</title>
+<meta name="theme-color" content="#101114">
+<title>日文單字庫</title>
 <style>
-*{box-sizing:border-box}body{margin:0;background:#111318;color:#e9ecf1;font-family:-apple-system,BlinkMacSystemFont,"Noto Sans TC","Noto Sans JP",sans-serif}
-.app{max-width:560px;margin:auto;min-height:100vh;padding:18px 16px 60px}h1{font-size:27px;margin:4px 0;color:#f5f7fa}.sub{color:#9aa1ad;margin:0 0 16px}
-.tabs{display:flex;gap:8px;margin:10px 0}.tab{flex:1;background:#e6e6eb;border:0;border-radius:13px;padding:13px;font-size:16px;font-weight:700}.tab.active{background:#111;color:#fff}
-.panel,.card{background:#fff;border-radius:22px;padding:20px;box-shadow:0 7px 26px #0001;margin-bottom:14px}.card{min-height:410px;display:flex;flex-direction:column;justify-content:center;text-align:center;cursor:pointer;position:relative}
-.jp{font-size:44px;font-weight:800}.reading{font-size:19px;color:#777;margin:6px 0 20px}.meaning{font-size:25px;font-weight:700;margin-bottom:20px}
-.ex{border-top:1px solid #eee;padding-top:17px;text-align:left}.ej{font-size:19px;line-height:1.65}.ec{color:#666;line-height:1.65;margin-top:4px}
-.row,.levels{display:flex;gap:8px;margin:10px 0}.row button,.levels button{flex:1}button{border:0;border-radius:13px;padding:13px;font-size:16px;font-weight:700}
-.dark{background:#111;color:#fff}.light{background:#e7e7ec}.hidden{display:none}.hint{color:#999}.count,.msg,.small{color:#777;font-size:14px}
-input,textarea{width:100%;border:1px solid #d8d8dc;border-radius:12px;padding:12px;font-size:16px}textarea{min-height:70px}
-label{display:block;font-weight:700;margin:12px 0 6px}.wide{width:100%;margin-top:12px}.note{background:#f7f2ff;padding:12px;border-radius:12px;color:#5d4a7a;font-size:14px;line-height:1.5}
-.speaker{position:absolute;right:14px;bottom:14px;width:42px;height:42px;padding:0;border-radius:50%;background:#2a2e37;color:#fff;font-size:20px;display:flex;align-items:center;justify-content:center}.knowBtn{background:#30353e!important;color:#f0f2f5!important}.learnBtn{background:#000!important;color:#fff!important}.item{padding:12px 0;border-bottom:1px solid #eee;line-height:1.5}.item b{font-size:18px}.danger{background:#ffe4e4;color:#9b2226}
-#importFile{display:none}.ok{color:#16734a}.err{color:#a61b1b}
-.libraryWord .m{color:#d9dde4}.libraryWord .small{color:#7f8794}.levelEmpty{color:#7f8794}</style>
+*{box-sizing:border-box}
+body{margin:0;background:#101114;color:#e9eaed;font-family:-apple-system,BlinkMacSystemFont,"Noto Sans TC","Noto Sans JP",sans-serif}
+.app{max-width:560px;margin:auto;min-height:100vh;padding:18px 16px 40px}
+.top{display:flex;align-items:center;gap:12px;margin-bottom:14px}
+.menu{width:44px;height:44px;border-radius:12px;background:#1b1d21;color:#fff;border:1px solid #30343b;font-size:22px}
+h1{font-size:27px;margin:0;color:#f5f6f7}
+.filter{width:100%;background:#1b1d21;color:#f2f3f5;border:1px solid #343941;border-radius:12px;padding:12px;font-size:15px;margin-bottom:12px}
+.card{min-height:420px;padding:22px 20px;position:relative;display:flex;flex-direction:column;justify-content:center;text-align:center;cursor:pointer;background:#202226;border:1px solid #30343a;border-radius:22px;box-shadow:0 14px 38px #0008}
+.edit,.star{position:absolute;top:13px;width:40px;height:40px;border-radius:12px;background:#2a2d32;color:#fff;border:1px solid #444952;font-size:19px;padding:0}.edit{left:13px}.star{right:13px}.star.on{color:#ffd45a}
+.jp{font-size:44px;font-weight:800;color:#fff}.reading{font-size:19px;color:#a8adb6;margin:7px 0 24px}
+.meaning{font-size:25px;font-weight:700;color:#c4c8cf;margin-bottom:20px}.ex{border-top:1px solid #34383f;padding-top:17px;text-align:left}
+.ej{font-size:19px;line-height:1.65;color:#fff}.ec{color:#aeb3bb;line-height:1.65;margin-top:4px}
+.hidden,.pageHidden{display:none!important}
+.next{width:100%;margin-top:12px;background:#f1f2f4;color:#111;border:0;border-radius:15px;padding:15px;font-size:17px;font-weight:800}
+.drawerShade{position:fixed;inset:0;background:#0009;z-index:20;display:none}.drawerShade.open{display:block}
+.drawer{position:fixed;left:0;top:0;bottom:0;width:min(310px,84vw);background:#17191d;color:#fff;z-index:21;padding:22px 16px;box-shadow:12px 0 40px #0008;transform:translateX(-105%);transition:.2s}.drawer.open{transform:translateX(0)}
+.drawer h2{margin:5px 8px 20px}.close{float:right;background:none;color:#aaa;border:0;font-size:24px}
+.drawerBtn,.catBtn{width:100%;text-align:left;background:#22252b;color:#eee;border:1px solid #30343b;border-radius:13px;padding:14px;margin:5px 0;font-size:16px;font-weight:700}
+.panel{background:#202226;border:1px solid #30343a;border-radius:18px;padding:20px;margin-bottom:14px}
+.panel label{display:block;color:#c8ccd3;font-weight:700;margin:12px 0 6px}
+input,textarea{width:100%;background:#121418;color:#fff;border:1px solid #383d46;border-radius:12px;padding:12px;font-size:16px}textarea{min-height:70px}
+.row{display:flex;gap:8px}.row button{flex:1}.btn{border:0;border-radius:13px;padding:13px;font-size:16px;font-weight:700}
+.dark{background:#f1f2f4;color:#111}.light{background:#292d34;color:#fff;border:1px solid #464b55}
+.small,.msg{color:#969eaa;font-size:14px}.item,.word{padding:12px 2px;border-bottom:1px solid #30343b;line-height:1.5}.word b{font-size:18px}.word .r{color:#969ca7;margin-left:7px}.word .m{color:#bfc3ca;margin-top:3px}
+.modalShade{position:fixed;inset:0;background:#000b;z-index:30;display:none;align-items:flex-end;justify-content:center}.modalShade.open{display:flex}
+.modal{width:min(560px,100%);max-height:92vh;overflow:auto;background:#1b1d21;border-radius:22px 22px 0 0;padding:20px;color:#fff}
+.modal h2{margin:0 0 8px}.modalActions{display:flex;gap:8px;margin-top:14px}.modalActions button{flex:1}
+</style>
 </head>
 <body>
 <div class="app">
-<h1>日文單字庫</h1>
+<div class="top"><button class="menu" onclick="openDrawer()">☰</button><h1>日文單字庫</h1></div>
 
-<div class="tabs">
-<button id="studyTab" class="tab active" onclick="showTab('study')">📖 背單字</button>
-<button id="addTab" class="tab" onclick="showTab('add')">➕ 我的單字</button>
-<button id="libraryTab" class="tab" onclick="showTab('library')">📚 單字庫</button>
-</div>
-
-<section id="study">
-<div class="count" id="count">載入中…</div>
-<div class="card" onclick="flip()">
-<div class="jp" id="jp">載入中…</div>
-<div class="reading" id="reading"></div>
-<button class="speaker" aria-label="念讀音" onclick="event.stopPropagation();speak()">🔊</button>
+<section id="quizPage">
+<select id="filter" class="filter" onchange="applyFilter()">
+<option value="ALL">全部單字</option><option value="N1">N1</option><option value="N2">N2</option>
+<option value="N3">N3</option><option value="N4">N4</option><option value="N5">N5</option>
+<option value="STAR">⭐ 打星號的單字</option>
+</select>
+<div class="card" id="card">
+<button class="edit" onclick="event.stopPropagation();openEditor()">✎</button>
+<button class="star" id="star" onclick="event.stopPropagation();toggleStar()">☆</button>
+<div class="jp" id="jp">載入中…</div><div class="reading" id="reading"></div>
 <div id="answer" class="hidden"><div class="meaning" id="meaning"></div><div class="ex"><div class="ej" id="ej"></div><div class="ec" id="ec"></div></div></div>
-
 </div>
-<div class="levels">
-<button class="knowBtn" onclick="rate('熟悉')">✓ 我知道了</button>
-<button class="learnBtn" onclick="rate('不熟')">📖 我要學習</button>
-</div>
-<div class="row"><button class="light" onclick="shuffle()">🔀 隨機抽下一題</button></div>
+<button class="next" onclick="nextQuestion()">下一題</button>
 </section>
 
-<section id="add" class="hidden">
-<div class="panel">
-<b>➕ 新增我的單字</b>
+<section id="addPage" class="pageHidden">
+<div class="panel"><b>➕ 新增我的單字</b>
 <label>日文</label><input id="newjp" placeholder="例如：猫">
 <label>讀音／假名</label><input id="newr" placeholder="例如：ねこ">
 <label>中文意思</label><input id="newm" placeholder="例如：貓">
-<label>日文例句</label><textarea id="newej" placeholder="例如：猫がいます。"></textarea>
-<label>中文例句</label><textarea id="newec" placeholder="例如：有一隻貓。"></textarea>
-<button class="dark wide" onclick="addWord()">＋ 加入我的單字</button>
-<div id="msg" class="msg"></div>
-</div>
-
-<div class="panel">
-<b>💾 我的資料備份</b>
-<p class="small">這裡只處理你自己新增的單字，不會覆蓋內建 1000 筆。</p>
-<div class="row">
-<button class="light" onclick="exportMine()">📤 匯出</button>
-<button class="light" onclick="document.getElementById('importFile').click()">📥 匯入</button>
-</div>
-<input id="importFile" type="file" accept=".json,application/json" onchange="importMine(event)">
-<div id="backupMsg" class="msg"></div>
-</div>
-
-<div class="panel">
-<b>我的單字：<span id="total">0</span> 個</b>
-<div id="list"></div>
-</div>
+<label>日文例句</label><textarea id="newej"></textarea>
+<label>中文例句</label><textarea id="newec"></textarea>
+<button class="btn dark" style="width:100%;margin-top:14px" onclick="addWord()">＋ 加入我的單字</button><div id="addMsg" class="msg"></div></div>
+<div class="panel"><b>💾 我的資料備份</b><p class="small">更新 index.html 不會刪除這裡的資料。</p>
+<div class="row"><button class="btn light" onclick="exportMine()">📤 匯出</button><button class="btn light" onclick="document.getElementById('file').click()">📥 匯入</button></div>
+<input id="file" type="file" accept=".json" style="display:none" onchange="importMine(event)"><div id="backupMsg" class="msg"></div></div>
+<div class="panel"><b>我的單字：<span id="total">0</span> 個</b><div id="mineList"></div></div>
 </section>
 
-<section id="library" class="hidden">
-<div class="panel">
-<b>📚 單字庫</b>
-<p class="small">依 JLPT 等級查看單字。目前內建的是 N5 1000 筆；其他等級可以之後再加入，不會影響你的個人單字。</p>
-<div class="levels" id="libraryLevels">
-<button class="dark" onclick="showLevel('N5')">N5</button>
-<button class="light" onclick="showLevel('N4')">N4</button>
-<button class="light" onclick="showLevel('N3')">N3</button>
-<button class="light" onclick="showLevel('N2')">N2</button>
-<button class="light" onclick="showLevel('N1')">N1</button>
-</div>
-<div class="levels" id="masteryLevels">
-<button class="dark" onclick="showMastery('全部')">全部</button>
-<button class="light" onclick="showMastery('不熟')">📖 我要學習</button>
-<button class="light" onclick="showMastery('熟悉')">✓ 我知道了</button>
-</div>
-<div id="libraryTitle" class="count"></div>
-<div id="libraryList"></div>
-</div>
+<section id="dbPage" class="pageHidden">
+<div id="dbHome"><h2>📚 資料庫</h2>
+<button class="catBtn" onclick="openCategory('N1')">N1 單字</button><button class="catBtn" onclick="openCategory('N2')">N2 單字</button>
+<button class="catBtn" onclick="openCategory('N3')">N3 單字</button><button class="catBtn" onclick="openCategory('N4')">N4 單字</button>
+<button class="catBtn" onclick="openCategory('N5')">N5 單字</button><button class="catBtn" onclick="openCategory('STAR')">⭐ 打星號的單字</button>
+<button class="catBtn" onclick="openCategory('MINE')">➕ 我的單字</button></div>
+<div id="dbDetail" class="pageHidden"><button class="btn light" onclick="closeCategory()">← 返回</button><h2 id="dbTitle"></h2><div id="dbList"></div></div>
 </section>
 </div>
+
+<div id="shade" class="drawerShade" onclick="closeDrawer()"></div>
+<aside id="drawer" class="drawer"><button class="close" onclick="closeDrawer()">×</button><h2>☰ 日文單字庫</h2>
+<button class="drawerBtn" onclick="go('add')">➕ 新增我的單字</button>
+<button class="drawerBtn" onclick="go('db')">📚 資料庫</button>
+<button class="drawerBtn" onclick="go('quiz')">📝 單字測驗</button></aside>
+
+<div id="modalShade" class="modalShade"><div class="modal"><h2>✎ 編輯單字</h2>
+<label>日文</label><input id="ejp"><label>讀音／假名</label><input id="er"><label>中文意思</label><input id="em">
+<label>日文例句</label><textarea id="eej"></textarea><label>中文例句</label><textarea id="eec"></textarea>
+<div class="modalActions"><button class="btn light" onclick="closeEditor()">取消</button><button class="btn dark" onclick="saveEditor()">儲存</button></div><div id="editMsg" class="msg"></div>
+</div></div>
 
 <script>
-(function(){
-"use strict";
-var BUILTIN_KEY="jpN5BuiltinV2", MINE_KEY="jpN5MineV2", idx=0, flipped=false, all=[], mine=[], builtin=[], ready=false, currentMastery="全部";
-
-function $(id){return document.getElementById(id)}
-function safeParse(s){try{return JSON.parse(s)}catch(e){return null}}
+const MINE_KEY="jpN5MineV2",STAR_KEY="jpN5StarsV2";
+let builtin=[],mine=[],all=[],pool=[],current=null,editIndex=-1;
+const $=id=>document.getElementById(id);
+const esc=s=>String(s??"").replace(/[&<>"']/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#039;"}[c]));
+const parse=s=>{try{return JSON.parse(s)}catch(e){return null}};
+const key=w=>(w.jp||"")+"|"+(w.r||"");
+const stars=()=>parse(localStorage.getItem(STAR_KEY))||{};
+function isStar(w){return !!stars()[key(w)]}
+function level(w){return w.level||w.n||w.levels||(w.mine?"自訂":"N5")}
 function saveMine(){localStorage.setItem(MINE_KEY,JSON.stringify(mine))}
-function escapeHtml(s){return String(s==null?"":s).replace(/[&<>"']/g,function(c){return {"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#039;"}[c]})}
+function rebuild(){all=builtin.concat(mine);renderMine();applyFilter()}
+function applyFilter(){
+ let f=$("filter").value;
+ pool=f==="ALL"?all.slice():f==="STAR"?all.filter(isStar):all.filter(w=>level(w)===f);
+ nextQuestion();
+}
+function nextQuestion(){
+ $("answer").classList.add("hidden");
+ if(!pool.length){current=null;$("jp").textContent="目前沒有符合條件的單字";$("reading").textContent="";$("star").textContent="☆";return}
+ let n=pool[Math.floor(Math.random()*pool.length)];
+ if(pool.length>1&&n===current)n=pool[Math.floor(Math.random()*pool.length)];
+ current=n;
+ $("jp").textContent=n.jp||"";$("reading").textContent=n.r||"";$("meaning").textContent=n.m||"";
+ $("ej").textContent=n.ej||"";$("ec").textContent=n.ec||"";
+ $("star").textContent=isStar(n)?"★":"☆";$("star").className="star "+(isStar(n)?"on":"");
+}
+$("card").onclick=()=>{if(current)$("answer").classList.toggle("hidden")}
+function toggleStar(){if(!current)return;let s=stars(),k=key(current);s[k]?delete s[k]:s[k]=true;localStorage.setItem(STAR_KEY,JSON.stringify(s));nextQuestion()}
+function openEditor(){
+ if(!current)return;
+ editIndex=mine.indexOf(current);
+ $("ejp").value=current.jp||"";$("er").value=current.r||"";$("em").value=current.m||"";$("eej").value=current.ej||"";$("eec").value=current.ec||"";
+ $("editMsg").textContent=editIndex<0?"內建單字會建立成你的自訂版本，不會修改 n5_words.json。":"";
+ $("modalShade").classList.add("open");
+}
+function closeEditor(){$("modalShade").classList.remove("open")}
+function saveEditor(){
+ let w={jp:$("ejp").value.trim(),r:$("er").value.trim(),m:$("em").value.trim(),ej:$("eej").value.trim(),ec:$("eec").value.trim(),mine:true};
+ if(!w.jp||!w.r||!w.m){$("editMsg").textContent="請填寫日文、讀音、中文意思";return}
+ if(editIndex>=0){w.level=mine[editIndex].level;mine[editIndex]=w}else{w.level=level(current);mine.push(w)}
+ saveMine();rebuild();current=w;nextQuestion();closeEditor()
+}
+function addWord(){
+ let v=id=>$(id).value.trim();if(!v("newjp")||!v("newr")||!v("newm")){$("addMsg").textContent="請填寫日文、讀音、中文意思";return}
+ mine.push({jp:v("newjp"),r:v("newr"),m:v("newm"),ej:v("newej"),ec:v("newec"),mine:true});saveMine();rebuild();
+ ["newjp","newr","newm","newej","newec"].forEach(id=>$(id).value="");$("addMsg").textContent="✅ 已儲存"
+}
+function renderMine(){$("total").textContent=mine.length;$("mineList").innerHTML=mine.map(w=>`<div class="word"><b>${esc(w.jp)}</b><span class="r">${esc(w.r)}</span><div class="m">${esc(w.m)}</div></div>`).join("")||'<p class="small">還沒有自己新增的單字。</p>'}
+function exportMine(){let b=new Blob([JSON.stringify(mine,null,2)],{type:"application/json"}),a=document.createElement("a");a.href=URL.createObjectURL(b);a.download="my_japanese_words.json";a.click()}
+function importMine(e){let f=e.target.files[0];if(!f)return;let r=new FileReader();r.onload=()=>{let d=parse(r.result);if(!Array.isArray(d)){ $("backupMsg").textContent="❌ 格式錯誤";return}mine=mine.concat(d.filter(w=>w&&w.jp));saveMine();rebuild();$("backupMsg").textContent="✅ 匯入完成，原有資料保留"};r.readAsText(f,"utf-8")}
+function openDrawer(){$("drawer").classList.add("open");$("shade").classList.add("open")}
+function closeDrawer(){$("drawer").classList.remove("open");$("shade").classList.remove("open")}
+function go(p){$("quizPage").classList.toggle("pageHidden",p!=="quiz");$("addPage").classList.toggle("pageHidden",p!=="add");$("dbPage").classList.toggle("pageHidden",p!=="db");closeDrawer();if(p==="add")renderMine();if(p==="db"){ $("dbHome").classList.remove("pageHidden");$("dbDetail").classList.add("pageHidden")}}
+function openCategory(c){$("dbHome").classList.add("pageHidden");$("dbDetail").classList.remove("pageHidden");let list=c==="STAR"?all.filter(isStar):c==="MINE"?mine:all.filter(w=>level(w)===c);$("dbTitle").textContent=(c==="STAR"?"⭐ 收藏":c==="MINE"?"➕ 我的單字":c)+"（"+list.length+"）";$("dbList").innerHTML=list.map(w=>`<div class="word"><b>${esc(w.jp)}</b><span class="r">${esc(w.r)}</span><div class="m">${esc(w.m)}</div></div>`).join("")||'<p class="small">目前沒有資料。</p>'}
+function closeCategory(){$("dbHome").classList.remove("pageHidden");$("dbDetail").classList.add("pageHidden")}
 
-function rebuild(){
-  all=builtin.concat(mine);
-  if(idx>=all.length)idx=0;
-  render();
-  renderList();
-}
-function render(){
- if(!ready||!all.length)return;
- var w=all[idx]||{};
- $("jp").textContent=w.jp||"";
- $("reading").textContent=w.r||"";
- $("meaning").textContent=w.m||"";
- $("ej").textContent=w.ej||"";
- $("ec").textContent=w.ec||"";
- $("count").textContent="第 "+(idx+1)+" / "+all.length+" 個"+(idx>=builtin.length&&mine.length?"｜我的單字":"");
- $("answer").classList.toggle("hidden",!flipped);
-}
-window.flip=function(){flipped=!flipped;render()}
-window.next=function(){if(!all.length)return;idx=(idx+1)%all.length;flipped=false;render()}
-window.prev=function(){if(!all.length)return;idx=(idx-1+all.length)%all.length;flipped=false;render()}
-window.shuffle=function(){if(!all.length)return;idx=Math.floor(Math.random()*all.length);flipped=false;render()}
-window.speak=function(){if(!all.length)return;var u=new SpeechSynthesisUtterance(all[idx].r||all[idx].jp);u.lang="ja-JP";u.rate=.85;speechSynthesis.cancel();speechSynthesis.speak(u)}
-window.rate=function(x){
-  if(!all.length)return;
-  var w=all[idx]; w.level=x;
-  if(idx>=builtin.length){
-    mine[idx-builtin.length].level=x; saveMine();
-  }else{
-    var marks=safeParse(localStorage.getItem(BUILTIN_KEY))||{};
-    var key=w.jp+"|"+w.r;
-    marks[key]=x;
-    localStorage.setItem(BUILTIN_KEY,JSON.stringify(marks));
-  }
-  window.next();
-}
-window.showTab=function(x){
-  $("study").classList.toggle("hidden",x!=="study");
-  $("add").classList.toggle("hidden",x!=="add");
-  $("library").classList.toggle("hidden",x!=="library");
-  $("studyTab").classList.toggle("active",x==="study");
-  $("addTab").classList.toggle("active",x==="add");
-  $("libraryTab").classList.toggle("active",x==="library");
-  if(x==="add")renderList();
-  if(x==="library" && ready){currentMastery="全部";showLevel("N5");showMastery("全部");}
-}
-window.showLevel=function(level){
-  var buttons=$("libraryLevels").querySelectorAll("button");
-  buttons.forEach(function(b){b.className=(b.textContent===level?"dark":"light")});
-  renderLibrary(level,currentMastery);
-}
-window.showMastery=function(mastery){
-  currentMastery=mastery;
-  var buttons=$("masteryLevels").querySelectorAll("button");
-  buttons.forEach(function(b){
-    var label=(b.textContent.indexOf("我要學習")>=0?"不熟":b.textContent.indexOf("我知道了")>=0?"熟悉":"全部");
-    b.className=(label===mastery?"dark":"light");
-  });
-  var levelButton=$("libraryLevels").querySelector(".dark");
-  var level=levelButton ? levelButton.textContent : "N5";
-  renderLibrary(level,mastery);
-}
-function renderLibrary(level,mastery){
-  var list=[];
-  if(level==="N5") list=builtin;
-  if(mastery!=="全部") list=list.filter(function(w){return (w.level||"")===mastery});
-  var displayMastery=mastery==="不熟"?"我要學習":mastery==="熟悉"?"我知道了":mastery;
-  $("libraryTitle").textContent=level+"｜"+displayMastery+"｜"+list.length+" 個";
-  if(!list.length){
-    $("libraryList").innerHTML='<div class="levelEmpty">目前沒有符合條件的單字。<br>在背單字時按「不熟／普通／熟悉」，就會自動分類到這裡。</div>';
-    return;
-  }
-  $("libraryList").innerHTML=list.map(function(w,i){
-    return '<div class="libraryWord"><b>'+(i+1)+'. '+escapeHtml(w.jp)+'</b><span class="r">'+escapeHtml(w.r)+'</span><div class="m">'+escapeHtml(w.m)+'</div><div class="small">'+escapeHtml(w.level==="不熟"?"我要學習":w.level==="熟悉"?"我知道了":w.level||"尚未分類")+'</div></div>';
-  }).join("");
-}
-
-window.addWord=function(){
- var v=function(id){return $(id).value.trim()};
- if(!v("newjp")||!v("newr")||!v("newm")){$("msg").textContent="請填寫日文、讀音、中文意思";return}
- var w={jp:v("newjp"),r:v("newr"),m:v("newm"),ej:v("newej"),ec:v("newec"),level:"",mine:true,createdAt:new Date().toISOString()};
- mine.push(w);saveMine();rebuild();idx=all.length-1;flipped=true;render();
- ["newjp","newr","newm","newej","newec"].forEach(function(id){$(id).value=""});
- $("msg").textContent="✅ 已儲存。之後更新 index.html 不會刪掉它。";
-}
-function renderList(){
- $("total").textContent=mine.length;
- $("list").innerHTML=mine.slice().reverse().map(function(w,i){
-   var n=mine.length-i-1;
-   return '<div class="item"><b>'+escapeHtml(w.jp)+'</b>　'+escapeHtml(w.r)+'<br>'+escapeHtml(w.m)+'<br><span class="small">'+escapeHtml(w.ej||"")+'</span></div>';
- }).join("")||'<p class="small">還沒有自己新增的單字。</p>';
-}
-window.exportMine=function(){
- var blob=new Blob([JSON.stringify(mine,null,2)],{type:"application/json"});
- var a=document.createElement("a");a.href=URL.createObjectURL(blob);a.download="my_japanese_words.json";a.click();URL.revokeObjectURL(a.href);
- $("backupMsg").textContent="✅ 已匯出我的單字。";
-}
-window.importMine=function(ev){
- var f=ev.target.files&&ev.target.files[0];if(!f)return;
- var rd=new FileReader();
- rd.onload=function(){
-  var data=safeParse(rd.result);
-  if(!Array.isArray(data)){$("backupMsg").textContent="❌ 檔案格式不正確";return}
-  var valid=data.filter(function(w){return w&&w.jp&&w.r&&w.m});
-  mine=mine.concat(valid);saveMine();rebuild();
-  $("backupMsg").textContent="✅ 已匯入 "+valid.length+" 個單字。原本的單字沒有刪除。";
-  ev.target.value="";
- };rd.readAsText(f,"utf-8");
-}
-
-fetch("n5_words.json",{cache:"no-store"}).then(function(r){if(!r.ok)throw new Error("找不到 n5_words.json");return r.json()}).then(function(data){
- if(!Array.isArray(data)||!data.length)throw new Error("n5_words.json 資料格式錯誤");
- builtin=data;
- var marks=safeParse(localStorage.getItem(BUILTIN_KEY))||{};
- builtin.forEach(function(w){
-   var key=w.jp+"|"+w.r;
-   if(marks[key])w.level=marks[key];
- });
- var old=safeParse(localStorage.getItem(MINE_KEY));
- mine=Array.isArray(old)?old:[];
- ready=true;rebuild();
-}).catch(function(e){
- $("jp").textContent="載入失敗";$("count").textContent="請確認 index.html 與 n5_words.json 在同一個資料夾";
- console.error(e);
-});
-})();
+fetch("n5_words.json",{cache:"no-store"}).then(r=>{if(!r.ok)throw Error("n5_words.json");return r.json()}).then(d=>{
+ builtin=Array.isArray(d)?d:[];let m=parse(localStorage.getItem(MINE_KEY));mine=Array.isArray(m)?m:[];rebuild()
+}).catch(()=>{let m=parse(localStorage.getItem(MINE_KEY));mine=Array.isArray(m)?m:[];rebuild();$("jp").textContent="找不到 n5_words.json";$("reading").textContent="請確認它與 index.html 在同一個資料夾"})
 </script>
-</body>
-</html>
+</body></html>
