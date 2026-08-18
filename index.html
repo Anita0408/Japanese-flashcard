@@ -4,6 +4,7 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
 <title>日文單字庫</title>
+<meta name="theme-color" content="#0d0f12">
 <style>
 :root{--bg:#0d0f12;--panel:#1b1e23;--panel2:#22262c;--line:#343a43;--text:#f4f5f7;--muted:#a9afb9;--accent:#f2f4f7}
 *{box-sizing:border-box}body{margin:0;background:var(--bg);color:var(--text);font-family:-apple-system,BlinkMacSystemFont,"Noto Sans TC",sans-serif}
@@ -13,9 +14,9 @@ h1{font-size:40px;margin:0;font-weight:800;letter-spacing:.02em}
 .iconbtn,.star,.edit,.reset{border:1px solid var(--line);background:var(--panel);color:var(--text);border-radius:20px;display:grid;place-items:center;cursor:pointer}
 .iconbtn{width:62px;height:62px;font-size:32px}.reset{width:58px;height:58px;font-size:27px}
 select{width:100%;height:58px;border-radius:30px;background:var(--panel);border:1px solid var(--line);color:var(--text);font-size:22px;padding:0 18px;margin-bottom:26px}
-.card{min-height:560px;background:var(--panel);border:1px solid #3b414b;border-radius:42px;padding:30px;position:relative;display:flex;flex-direction:column;justify-content:center;align-items:center;text-align:center}
+.card{min-height:560px;perspective:1200px;background:var(--panel);border:1px solid #3b414b;border-radius:42px;padding:30px;position:relative;display:flex;flex-direction:column;justify-content:center;align-items:center;text-align:center}
 .edit,.star{position:absolute;width:58px;height:58px;font-size:27px;top:28px}.edit{left:28px}.star{right:28px}.star.on{color:#fff}
-.jp{font-size:56px;font-weight:800;line-height:1.2;margin:20px 0 10px}.reading{font-size:25px;color:var(--muted);margin-bottom:18px}.meaning{font-size:27px;color:#c3c8d0;margin-bottom:30px}.example{font-size:22px;line-height:1.6;color:#f2f3f5;max-width:90%}
+.card.flipped{background:#20242a}.jp{font-size:56px;font-weight:800;line-height:1.2;margin:20px 0 10px}.reading{font-size:25px;color:var(--muted);margin-bottom:18px}.meaning{font-size:27px;color:#c3c8d0;margin-bottom:30px}.flip-hint{font-size:15px;color:#777f8b;margin-top:20px}.example{font-size:22px;line-height:1.6;color:#f2f3f5;max-width:90%}
 .actions{display:flex;gap:16px;margin-top:24px}.next{height:68px;flex:1;border:0;border-radius:34px;background:#f0f1f2;color:#101216;font-size:25px;font-weight:800;cursor:pointer}
 .empty{font-size:28px;color:var(--muted)}
 .drawer{position:fixed;inset:0;display:none;background:rgba(0,0,0,.62);z-index:10}.drawer.open{display:block}.menu{width:min(330px,85vw);height:100%;background:#15181c;padding:28px 20px;box-shadow:8px 0 30px #000}
@@ -54,7 +55,7 @@ select{width:100%;height:58px;border-radius:30px;background:var(--panel);border:
 "use strict";
 const KEY="jp_vocab_user_v2";
 const VIEW="jp_vocab_seen_v2";
-let base=[], user=[], seen={}, current=null, currentPool=[];
+let base=[], user=[], seen={}, current=null, currentPool=[], flipped=false;
 const fallback=[
 ["赤","あか","紅色","これは「赤」です。","這是「紅色」。"],
 ["青","あお","藍色","これは「青」です。","這是「藍色」。"],
@@ -73,7 +74,7 @@ function loadStore(){
  try{seen=JSON.parse(localStorage.getItem(VIEW)||"{}");if(!seen||typeof seen!=="object")seen={}}catch(e){seen={}}
 }
 function save(){localStorage.setItem(KEY,JSON.stringify(user));localStorage.setItem(VIEW,JSON.stringify(seen))}
-function norm(w,i){return {id:w.id||("base-"+i),jp:String(w.jp||w.word||"").replace(/（N[1-5]）$/,"").replace(/\(N[1-5]\)$/,""),r:w.r||w.reading||"",m:w.m||w.meaning||"",ej:w.ej||w.example||"",ec:w.ec||"",level:(w.level||"N5").toUpperCase(),star:!!w.star,category:w.category||""}}
+function norm(w,i){return {id:w.id||("base-"+i),jp:String(w.jp||w.word||"").replace(/（N[1-5]）$/,"").replace(/\(N[1-5]\)$/,""),r:w.r||w.reading||"",m:w.m||w.meaning||"",ej:w.ej||w.example||"",ec:w.ec||"",level:(w.level||"N5").toUpperCase(),star:!!w.star,category:String(w.category||w.type||w.group||"").trim()}}
 function mergeData(){
  const map=new Map();
  base.forEach(w=>map.set(w.jp+"|"+w.r,w));
@@ -82,10 +83,37 @@ function mergeData(){
 }
 function pool(){
  const f=document.getElementById("filter").value;
- let a=mergeData().filter(w=>f==="ALL"?true:f==="STAR"?w.star:w.level===f);
- return a;
+ return mergeData().filter(w=>{
+   if(f==="ALL") return true;
+   if(f==="STAR") return !!w.star;
+   if(f.startsWith("LEVEL:")) return (w.level||"").toUpperCase()===f.slice(6);
+   if(f.startsWith("CAT:")) return (w.category||"")===f.slice(4);
+   return false;
+ });
+}
+function refreshFilters(){
+ const select=document.getElementById("filter");
+ const all=mergeData();
+ const levels=[...new Set(all.map(w=>(w.level||"").toUpperCase()).filter(Boolean))].sort((a,b)=>{
+   const na=parseInt(a.replace(/\D/g,"")), nb=parseInt(b.replace(/\D/g,""));
+   if(!Number.isNaN(na)&&!Number.isNaN(nb)) return na-nb;
+   return a.localeCompare(b);
+ });
+ const cats=[...new Set(all.map(w=>w.category||"").filter(Boolean))].sort((a,b)=>a.localeCompare(b,"zh-Hant"));
+ const currentValue=select.value;
+ select.innerHTML='<option value="ALL">全部單字</option><option value="STAR">⭐ 打星號的單字</option>';
+ const levelGroup=document.createElement("optgroup"); levelGroup.label="等級";
+ levels.forEach(l=>{const o=document.createElement("option");o.value="LEVEL:"+l;o.textContent=l;levelGroup.appendChild(o)});
+ select.appendChild(levelGroup);
+ if(cats.length){
+   const catGroup=document.createElement("optgroup"); catGroup.label="自訂分類";
+   cats.forEach(c=>{const o=document.createElement("option");o.value="CAT:"+c;o.textContent=c;catGroup.appendChild(o)});
+   select.appendChild(catGroup);
+ }
+ if([...select.options].some(o=>o.value===currentValue)) select.value=currentValue;
 }
 function choose(){
+ flipped=false;document.getElementById("card").classList.remove("flipped");
  currentPool=pool();
  if(!currentPool.length){current=null;render();return}
  const unseen=currentPool.filter(w=>!seen[w.id]);
@@ -95,47 +123,71 @@ function choose(){
  seen[current.id]=new Date().toISOString().slice(0,10); save(); render();
 }
 function render(){
- const area=document.getElementById("wordArea"), star=document.getElementById("starBtn"), status=document.getElementById("status");
- if(!current){area.innerHTML='<div class="empty">沒有符合條件的單字</div>';star.textContent="☆";status.textContent="";return}
- area.innerHTML='<div class="jp">'+esc(current.jp)+'</div><div class="reading">'+esc(current.r)+'</div><div class="meaning">'+esc(current.m)+'</div><div class="example">'+esc(current.ej||current.ec||"")+'</div>';
+ const area=document.getElementById("wordArea"), star=document.getElementById("starBtn"), status=document.getElementById("status"), card=document.getElementById("card");
+ card.classList.toggle("flipped",flipped);
+ if(!current){
+   area.innerHTML='<div class="empty">沒有符合條件的單字</div>';
+   star.textContent="☆";status.textContent="";return;
+ }
+ if(!flipped){
+   area.innerHTML='<div class="jp">'+esc(current.jp)+'</div><div class="flip-hint">點一下卡片翻牌</div>';
+ }else{
+   area.innerHTML='<div class="jp">'+esc(current.jp)+'</div><div class="reading">'+esc(current.r)+'</div><div class="meaning">'+esc(current.m)+'</div><div class="example">'+esc(current.ej||current.ec||"")+'</div>';
+ }
  star.textContent=current.star?"★":"☆"; star.classList.toggle("on",current.star);
- status.textContent=(current.level||"")+" · "+currentPool.length+" 個單字";
+ status.textContent=(current.level||"")+(current.category?" · "+current.category:"");
 }
 function esc(s){return String(s??"").replace(/[&<>"']/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]))}
 function openModal(html){document.getElementById("modalBox").innerHTML=html;document.getElementById("modal").classList.add("open")}
 function closeModal(){document.getElementById("modal").classList.remove("open")}
 function editWord(w){
+ const cats=[...new Set(mergeData().map(x=>x.category||"").filter(Boolean))].sort((a,b)=>a.localeCompare(b,"zh-Hant"));
  openModal(`<h3>編輯單字</h3>
  <div class="field"><label>日文</label><input id="fjp" value="${esc(w.jp)}"></div>
  <div class="field"><label>讀音</label><input id="fr" value="${esc(w.r)}"></div>
  <div class="field"><label>中文翻譯</label><input id="fm" value="${esc(w.m)}"></div>
  <div class="field"><label>例句</label><textarea id="fe">${esc(w.ej||"")}</textarea></div>
- <div class="field"><label>等級 / 分類</label><input id="fl" value="${esc(w.level||"N5")}"></div>
+ <div class="field"><label>等級</label><input id="fl" list="levelList" value="${esc(w.level||"N5")}"><datalist id="levelList"><option value="N1"><option value="N2"><option value="N3"><option value="N4"><option value="N5"></datalist></div>
+ <div class="field"><label>分類（可選既有分類，也可直接輸入新分類）</label><input id="fc" list="categoryList" value="${esc(w.category||"")}"><datalist id="categoryList">${cats.map(c=>`<option value="${esc(c)}">`).join("")}</datalist></div>
  <div class="row"><button id="cancel">取消</button><button class="primary" id="saveEdit">儲存</button></div>`);
  document.getElementById("cancel").onclick=closeModal;
  document.getElementById("saveEdit").onclick=()=>{
-   const nw={...w,jp:document.getElementById("fjp").value.trim(),r:document.getElementById("fr").value.trim(),m:document.getElementById("fm").value.trim(),ej:document.getElementById("fe").value.trim(),level:document.getElementById("fl").value.trim().toUpperCase()||"N5"};
+   const nw={...w,
+     jp:document.getElementById("fjp").value.trim(),
+     r:document.getElementById("fr").value.trim(),
+     m:document.getElementById("fm").value.trim(),
+     ej:document.getElementById("fe").value.trim(),
+     level:document.getElementById("fl").value.trim().toUpperCase()||"N5",
+     category:document.getElementById("fc").value.trim()
+   };
    const i=user.findIndex(x=>x.id===w.id);
-   if(i>=0)user[i]=nw; else user.push({...nw,id:"user-"+Date.now()});
-   current=(i>=0?user[i]:user[user.length-1]);save();closeModal();render();
+   if(i>=0) user[i]=nw; else user.push({...nw,id:"user-"+Date.now()});
+   current=(i>=0?user[i]:user[user.length-1]);
+   save(); refreshFilters(); closeModal(); render();
  };
 }
 function database(){
- const all=mergeData();
+ const all=mergeData().sort((a,b)=>(a.category||"").localeCompare(b.category||"","zh-Hant")||a.jp.localeCompare(b.jp,"ja"));
  openModal(`<h3>資料庫</h3><div class="list" id="dbList"></div><div class="row"><button id="closeDb">關閉</button></div>`);
  const list=document.getElementById("dbList");
- all.forEach(w=>{const d=document.createElement("div");d.className="wordrow";d.innerHTML=`<div><b>${esc(w.jp)}</b><small>${esc(w.r)}　${esc(w.m)}　${esc(w.level||"")}</small></div><button>✎</button>`;d.querySelector("button").onclick=()=>editWord(w);list.appendChild(d)});
+ all.forEach(w=>{
+   const d=document.createElement("div");d.className="wordrow";
+   const tag=w.category?` · ${esc(w.category)}`:"";
+   d.innerHTML=`<div><b>${esc(w.jp)}</b><small>${esc(w.r)}　${esc(w.m)}　${esc(w.level||"")}${tag}</small></div><button>✎</button>`;
+   d.querySelector("button").onclick=()=>editWord(w);
+   list.appendChild(d);
+ });
  document.getElementById("closeDb").onclick=closeModal;
 }
 function addWord(){
- editWord({id:"new-"+Date.now(),jp:"",r:"",m:"",ej:"",level:"N5",star:false});
+ editWord({id:"new-"+Date.now(),jp:"",r:"",m:"",ej:"",level:"N5",category:"",star:false});
 }
 async function loadBase(){
  loadStore();
  document.getElementById("status").textContent="正在讀取單字庫…";
  // Do not block the UI on the JSON request. The fallback is usable immediately.
  base=fallback.slice();
- render(); choose();
+ refreshFilters(); render(); choose();
  try{
    const res=await fetch("./n5_words.json?ts="+Date.now(),{cache:"no-store"});
    if(!res.ok)throw new Error("HTTP "+res.status);
@@ -148,6 +200,7 @@ async function loadBase(){
    }
    if(Array.isArray(data)){
      base=data.map(norm).filter(w=>w.jp);
+     refreshFilters();
      document.getElementById("status").textContent="單字庫已載入";
      choose();
    }
@@ -171,8 +224,19 @@ document.getElementById("restoreFile").onchange=e=>{
 document.getElementById("nextBtn").onclick=choose;
 document.getElementById("resetBtn").onclick=()=>{seen={};save();choose()};
 document.getElementById("filter").onchange=()=>choose();
-document.getElementById("starBtn").onclick=()=>{if(!current)return;current.star=!current.star;const i=user.findIndex(x=>x.id===current.id);if(i>=0)user[i].star=current.star;else user.push({...current});save();render()};
-document.getElementById("editBtn").onclick=()=>{if(current)editWord(current)};
+document.getElementById("starBtn").onclick=()=>{
+ if(!current)return;
+ current.star=!current.star;
+ const i=user.findIndex(x=>x.id===current.id);
+ if(i>=0) user[i].star=current.star; else user.push({...current});
+ save(); refreshFilters(); render(); // stay on the same card
+};
+document.getElementById("editBtn").onclick=()=>{if(current)editWord(current)}; // stay on the same card
+document.getElementById("card").onclick=e=>{
+ if(e.target.closest("button")) return;
+ if(!current) return;
+ flipped=!flipped; render();
+};
 document.getElementById("modal").onclick=e=>{if(e.target.id==="modal")closeModal()};
 loadBase();
 })();
