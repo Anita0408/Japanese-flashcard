@@ -6,24 +6,291 @@
 <title>日文單字庫</title>
 <meta name="theme-color" content="#0d0f12">
 <style>
-:root{--bg:#0d0f12;--panel:#1b1e23;--panel2:#22262c;--line:#343a43;--text:#f4f5f7;--muted:#a9afb9;--accent:#f2f4f7}
-*{box-sizing:border-box}body{margin:0;background:var(--bg);color:var(--text);font-family:-apple-system,BlinkMacSystemFont,"Noto Sans TC",sans-serif}
-.app{max-width:760px;margin:auto;padding:32px 18px 48px}
-header{display:flex;align-items:center;gap:18px;margin:18px 0 28px}
-h1{font-size:40px;margin:0;font-weight:800;letter-spacing:.02em}
-.iconbtn,.star,.edit,.reset{border:1px solid var(--line);background:var(--panel);color:var(--text);border-radius:20px;display:grid;place-items:center;cursor:pointer}
-.iconbtn{width:62px;height:62px;font-size:32px}.reset{width:58px;height:58px;font-size:27px}
-select{width:100%;height:58px;border-radius:30px;background:var(--panel);border:1px solid var(--line);color:var(--text);font-size:22px;padding:0 18px;margin-bottom:26px}
-.card{min-height:560px;perspective:1200px;background:var(--panel);border:1px solid #3b414b;border-radius:42px;padding:30px;position:relative;display:flex;flex-direction:column;justify-content:center;align-items:center;text-align:center}
-.edit,.star{position:absolute;width:58px;height:58px;font-size:27px;top:28px}.edit{left:28px}.star{right:28px}.star.on{color:#fff}
-.card.flipped{background:#20242a}.jp{font-size:56px;font-weight:800;line-height:1.2;margin:20px 0 10px}.reading{font-size:25px;color:var(--muted);margin-bottom:18px}.meaning{font-size:27px;color:#c3c8d0;margin-bottom:30px}.flip-hint{font-size:15px;color:#777f8b;margin-top:20px}.example{font-size:22px;line-height:1.6;color:#f2f3f5;max-width:90%}
-.actions{display:flex;gap:16px;margin-top:24px}.next{height:68px;flex:1;border:0;border-radius:34px;background:#f0f1f2;color:#101216;font-size:25px;font-weight:800;cursor:pointer}
-.empty{font-size:28px;color:var(--muted)}
-.drawer{position:fixed;inset:0;display:none;background:rgba(0,0,0,.62);z-index:10}.drawer.open{display:block}.menu{width:min(330px,85vw);height:100%;background:#15181c;padding:28px 20px;box-shadow:8px 0 30px #000}
-.menu h2{margin:5px 0 30px;font-size:27px}.item{width:100%;text-align:left;background:#20242a;color:var(--text);border:1px solid var(--line);padding:17px;border-radius:16px;margin:10px 0;font-size:20px}
-.modal{position:fixed;inset:0;background:rgba(0,0,0,.72);display:none;align-items:center;justify-content:center;z-index:20;padding:18px}.modal.open{display:flex}.box{width:min(620px,100%);max-height:90vh;overflow:auto;background:#191c21;border:1px solid var(--line);border-radius:24px;padding:24px}
-.box h3{margin-top:0;font-size:25px}.field{margin:12px 0}.field label{display:block;color:var(--muted);margin-bottom:6px}.field input,.field textarea{width:100%;background:#0f1114;color:var(--text);border:1px solid var(--line);border-radius:12px;padding:13px;font-size:17px}.field textarea{min-height:90px}.row{display:flex;gap:10px;margin-top:18px}.row button{flex:1;padding:13px;border-radius:13px;border:1px solid var(--line);background:#272b31;color:var(--text);font-size:17px}.row .primary{background:#f0f1f2;color:#101216;border:0}.list{display:grid;gap:10px}.wordrow{background:#22262c;border:1px solid var(--line);border-radius:14px;padding:14px;display:flex;align-items:center;justify-content:space-between}.wordrow small{color:var(--muted);display:block;margin-top:3px}.status{font-size:13px;color:var(--muted);text-align:center;margin-top:10px}
-@media(max-width:600px){.app{padding-top:18px}h1{font-size:34px}.card{min-height:500px}.jp{font-size:46px}.meaning{font-size:23px}}
+:root{
+  --bg:#0b0d10;
+  --panel:#1b1e23;
+  --panel2:#20242a;
+  --line:#353b45;
+  --line-soft:#2a2f37;
+  --text:#f4f5f7;
+  --muted:#aeb4bf;
+  --muted2:#7f8793;
+  --accent:#f4f5f7;
+}
+*{box-sizing:border-box}
+html{background:var(--bg)}
+body{
+  margin:0;
+  background:
+    radial-gradient(circle at 50% -10%,rgba(255,255,255,.045),transparent 34%),
+    var(--bg);
+  color:var(--text);
+  font-family:-apple-system,BlinkMacSystemFont,"Noto Sans TC","PingFang TC",sans-serif;
+  -webkit-font-smoothing:antialiased;
+}
+button,select,input,textarea{font:inherit}
+button{touch-action:manipulation}
+.app{
+  width:min(760px,100%);
+  margin:auto;
+  padding:28px 22px 42px;
+}
+header{
+  display:flex;
+  align-items:center;
+  gap:16px;
+  margin:8px 0 22px;
+}
+h1{
+  font-size:34px;
+  line-height:1.15;
+  margin:0;
+  font-weight:800;
+  letter-spacing:.01em;
+}
+.iconbtn,.star,.edit,.reset{
+  border:1px solid var(--line);
+  background:linear-gradient(180deg,#20242a,#191c21);
+  color:var(--text);
+  border-radius:18px;
+  display:grid;
+  place-items:center;
+  cursor:pointer;
+  box-shadow:inset 0 1px rgba(255,255,255,.035);
+}
+.iconbtn{width:58px;height:58px;font-size:30px;flex:none}
+.reset{width:58px;height:58px;font-size:26px;flex:none}
+select{
+  width:100%;
+  height:56px;
+  border-radius:28px;
+  background:#191c21;
+  border:1px solid var(--line);
+  color:var(--text);
+  font-size:20px;
+  padding:0 18px;
+  margin-bottom:18px;
+  outline:none;
+}
+.card{
+  min-height:570px;
+  perspective:1200px;
+  background:
+    linear-gradient(145deg,#20242a,#1a1d22);
+  border:1px solid #383f49;
+  border-radius:36px;
+  padding:84px 34px 46px;
+  position:relative;
+  display:flex;
+  flex-direction:column;
+  justify-content:center;
+  align-items:center;
+  text-align:center;
+  overflow:hidden;
+  box-shadow:
+    0 18px 45px rgba(0,0,0,.18),
+    inset 0 1px rgba(255,255,255,.025);
+  cursor:pointer;
+}
+.card:after{
+  content:"";
+  position:absolute;
+  inset:0;
+  pointer-events:none;
+  background:linear-gradient(180deg,rgba(255,255,255,.018),transparent 28%);
+}
+.edit,.star{
+  position:absolute;
+  width:56px;
+  height:56px;
+  font-size:25px;
+  top:22px;
+  z-index:2;
+}
+.edit{left:22px}
+.star{right:22px}
+.star.on{color:#fff}
+#wordArea{
+  width:100%;
+  display:flex;
+  flex-direction:column;
+  align-items:center;
+  justify-content:center;
+  min-height:360px;
+}
+.jp{
+  width:100%;
+  font-size:clamp(42px,8vw,58px);
+  font-weight:800;
+  line-height:1.18;
+  letter-spacing:.01em;
+  margin:0;
+  white-space:nowrap;
+  overflow:hidden;
+  text-overflow:ellipsis;
+}
+.reading{
+  font-size:clamp(19px,4vw,24px);
+  line-height:1.35;
+  color:var(--muted);
+  margin-top:12px;
+}
+.meaning{
+  font-size:clamp(19px,4vw,24px);
+  line-height:1.45;
+  color:#c5cad2;
+  margin-top:12px;
+  max-width:94%;
+}
+.example{
+  font-size:clamp(18px,3.8vw,21px);
+  line-height:1.7;
+  color:#f0f2f5;
+  max-width:92%;
+  margin-top:22px;
+  overflow-wrap:anywhere;
+}
+.flip-hint{
+  font-size:14px;
+  color:var(--muted2);
+  margin-top:20px;
+}
+.actions{
+  display:flex;
+  gap:12px;
+  margin-top:18px;
+}
+.next{
+  height:66px;
+  flex:1;
+  border:0;
+  border-radius:33px;
+  background:linear-gradient(180deg,#f5f5f6,#e9eaec);
+  color:#101216;
+  font-size:23px;
+  font-weight:800;
+  cursor:pointer;
+  box-shadow:0 8px 22px rgba(0,0,0,.12);
+}
+.empty{
+  font-size:22px;
+  color:var(--muted);
+}
+.status{
+  font-size:13px;
+  color:var(--muted2);
+  text-align:center;
+  margin-top:10px;
+  min-height:18px;
+}
+.drawer{
+  position:fixed;
+  inset:0;
+  display:none;
+  background:rgba(0,0,0,.66);
+  z-index:10;
+  backdrop-filter:blur(5px);
+}
+.drawer.open{display:block}
+.menu{
+  width:min(330px,85vw);
+  height:100%;
+  background:#15181c;
+  padding:28px 20px;
+  box-shadow:8px 0 30px #000;
+}
+.menu h2{margin:5px 0 30px;font-size:27px}
+.item{
+  width:100%;
+  text-align:left;
+  background:#20242a;
+  color:var(--text);
+  border:1px solid var(--line);
+  padding:17px;
+  border-radius:16px;
+  margin:10px 0;
+  font-size:19px;
+}
+.modal{
+  position:fixed;
+  inset:0;
+  background:rgba(0,0,0,.76);
+  display:none;
+  align-items:center;
+  justify-content:center;
+  z-index:20;
+  padding:18px;
+  backdrop-filter:blur(6px);
+}
+.modal.open{display:flex}
+.box{
+  width:min(620px,100%);
+  max-height:90vh;
+  overflow:auto;
+  background:#191c21;
+  border:1px solid var(--line);
+  border-radius:24px;
+  padding:24px;
+}
+.box h3{margin-top:0;font-size:25px}
+.field{margin:12px 0}
+.field label{display:block;color:var(--muted);margin-bottom:6px}
+.field input,.field textarea{
+  width:100%;
+  background:#0f1114;
+  color:var(--text);
+  border:1px solid var(--line);
+  border-radius:12px;
+  padding:13px;
+  font-size:17px;
+  outline:none;
+}
+.field textarea{min-height:90px}
+.row{display:flex;gap:10px;margin-top:18px}
+.row button{
+  flex:1;
+  padding:13px;
+  border-radius:13px;
+  border:1px solid var(--line);
+  background:#272b31;
+  color:var(--text);
+  font-size:17px;
+}
+.row .primary{background:#f0f1f2;color:#101216;border:0}
+.list{display:grid;gap:10px}
+.wordrow{
+  background:#22262c;
+  border:1px solid var(--line);
+  border-radius:14px;
+  padding:14px;
+  display:flex;
+  align-items:center;
+  justify-content:space-between;
+  gap:12px;
+}
+.wordrow small{color:var(--muted);display:block;margin-top:3px}
+@media(max-width:600px){
+  .app{padding:18px 16px 34px}
+  header{margin:4px 0 18px}
+  h1{font-size:30px}
+  .iconbtn{width:54px;height:54px}
+  select{height:54px;font-size:19px;margin-bottom:16px}
+  .card{
+    min-height:540px;
+    border-radius:32px;
+    padding:78px 24px 34px;
+  }
+  #wordArea{min-height:350px}
+  .jp{font-size:clamp(38px,11vw,52px)}
+  .next{height:62px;font-size:22px}
+  .reset{width:56px;height:56px}
+}
+@media(max-width:380px){
+  .card{min-height:500px}
+  #wordArea{min-height:320px}
+  .edit,.star{width:52px;height:52px;top:18px}
+  .edit{left:18px}.star{right:18px}
+}
 </style>
 </head>
 <body>
@@ -184,7 +451,7 @@ function addWord(){
 }
 async function loadBase(){
  loadStore();
- document.getElementById("status").textContent="正在讀取單字庫…";
+ document.getElementById("status").textContent="";
  // Do not block the UI on the JSON request. The fallback is usable immediately.
  base=fallback.slice();
  refreshFilters(); render(); choose();
@@ -201,11 +468,11 @@ async function loadBase(){
    if(Array.isArray(data)){
      base=data.map(norm).filter(w=>w.jp);
      refreshFilters();
-     document.getElementById("status").textContent="單字庫已載入";
+     document.getElementById("status").textContent="";
      choose();
    }
  }catch(e){
-   document.getElementById("status").textContent="已使用內建單字；若 GitHub 的 n5_words.json 可讀取會自動載入完整資料";
+   document.getElementById("status").textContent="";
  }
 }
 document.getElementById("menuBtn").onclick=()=>document.getElementById("drawer").classList.add("open");
