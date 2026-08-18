@@ -29,7 +29,7 @@ h1{font-size:27px;margin:0;color:#f5f6f7}
 input,textarea{width:100%;background:#121418;color:#fff;border:1px solid #383d46;border-radius:12px;padding:12px;font-size:16px}textarea{min-height:70px}
 .row{display:flex;gap:8px}.row button{flex:1}.btn{border:0;border-radius:13px;padding:13px;font-size:16px;font-weight:700}
 .dark{background:#f1f2f4;color:#111}.light{background:#292d34;color:#fff;border:1px solid #464b55}
-.small,.msg{color:#969eaa;font-size:14px}.item,.word{padding:12px 2px;border-bottom:1px solid #30343b;line-height:1.5}.word b{font-size:18px}.word .r{color:#969ca7;margin-left:7px}.word .m{color:#bfc3ca;margin-top:3px}
+.small,.msg{color:#969eaa;font-size:14px}.item,.word{padding:12px 2px;border-bottom:1px solid #30343b;line-height:1.5}.word b{font-size:18px}.wordTop{display:flex;align-items:center;justify-content:space-between;gap:8px}.wordEdit{background:#292d34;color:#fff;border:1px solid #464b55;border-radius:9px;padding:7px 10px}.word .r{color:#969ca7;margin-left:7px}.word .m{color:#bfc3ca;margin-top:3px}
 .modalShade{position:fixed;inset:0;background:#000b;z-index:30;display:none;align-items:flex-end;justify-content:center}.modalShade.open{display:flex}
 .modal{width:min(560px,100%);max-height:92vh;overflow:auto;background:#1b1d21;border-radius:22px 22px 0 0;padding:20px;color:#fff}
 .modal h2{margin:0 0 8px}.modalActions{display:flex;gap:8px;margin-top:14px}.modalActions button{flex:1}
@@ -80,9 +80,9 @@ input,textarea{width:100%;background:#121418;color:#fff;border:1px solid #383d46
 
 <div id="shade" class="drawerShade" onclick="closeDrawer()"></div>
 <aside id="drawer" class="drawer"><button class="close" onclick="closeDrawer()">×</button><h2>☰ 日文單字庫</h2>
-<button class="drawerBtn" onclick="go('add')">➕ 新增我的單字</button>
+<button class="drawerBtn" onclick="go('quiz')">📝 單字測驗</button>
 <button class="drawerBtn" onclick="go('db')">📚 資料庫</button>
-<button class="drawerBtn" onclick="go('quiz')">📝 單字測驗</button></aside>
+<button class="drawerBtn" onclick="go('add')">➕ 新增我的單字</button></aside>
 
 <div id="modalShade" class="modalShade"><div class="modal"><h2>✎ 編輯單字</h2>
 <label>日文</label><input id="ejp"><label>讀音／假名</label><input id="er"><label>中文意思</label><input id="em">
@@ -91,7 +91,13 @@ input,textarea{width:100%;background:#121418;color:#fff;border:1px solid #383d46
 </div></div>
 
 <script>
-const MINE_KEY="jpN5MineV2",STAR_KEY="jpN5StarsV2";
+const MINE_KEY="jpN5MineV2",OLD_MINE_KEY="jpN5Mine",STAR_KEY="jpN5StarsV2";
+function loadMine(){
+ let m=parse(localStorage.getItem(MINE_KEY));
+ if(Array.isArray(m)) return m;
+ let old=parse(localStorage.getItem(OLD_MINE_KEY));
+ return Array.isArray(old)?old:[];
+}
 let builtin=[],mine=[],all=[],pool=[],current=null,editIndex=-1;
 const $=id=>document.getElementById(id);
 const esc=s=>String(s??"").replace(/[&<>"']/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#039;"}[c]));
@@ -100,12 +106,22 @@ const key=w=>(w.jp||"")+"|"+(w.r||"");
 const stars=()=>parse(localStorage.getItem(STAR_KEY))||{};
 function isStar(w){return !!stars()[key(w)]}
 function level(w){return w.level||w.n||w.levels||(w.mine?"自訂":"N5")}
-function saveMine(){localStorage.setItem(MINE_KEY,JSON.stringify(mine))}
+function saveMine(){localStorage.setItem(MINE_KEY,JSON.stringify(mine));localStorage.setItem(OLD_MINE_KEY,JSON.stringify(mine))}
 function rebuild(){all=builtin.concat(mine);renderMine();applyFilter()}
 function applyFilter(){
  let f=$("filter").value;
  pool=f==="ALL"?all.slice():f==="STAR"?all.filter(isStar):all.filter(w=>level(w)===f);
  nextQuestion();
+}
+function renderCurrent(){
+ $("answer").classList.add("hidden");
+ if(!current){
+  $("jp").textContent="目前沒有符合條件的單字";$("reading").textContent="";
+  $("star").textContent="☆";$("star").className="star";return;
+ }
+ $("jp").textContent=current.jp||"";$("reading").textContent=current.r||"";
+ $("meaning").textContent=current.m||"";$("ej").textContent=current.ej||"";$("ec").textContent=current.ec||"";
+ $("star").textContent=isStar(current)?"★":"☆";$("star").className="star "+(isStar(current)?"on":"");
 }
 function nextQuestion(){
  $("answer").classList.add("hidden");
@@ -113,12 +129,10 @@ function nextQuestion(){
  let n=pool[Math.floor(Math.random()*pool.length)];
  if(pool.length>1&&n===current)n=pool[Math.floor(Math.random()*pool.length)];
  current=n;
- $("jp").textContent=n.jp||"";$("reading").textContent=n.r||"";$("meaning").textContent=n.m||"";
- $("ej").textContent=n.ej||"";$("ec").textContent=n.ec||"";
- $("star").textContent=isStar(n)?"★":"☆";$("star").className="star "+(isStar(n)?"on":"");
+ renderCurrent()
 }
 $("card").onclick=()=>{if(current)$("answer").classList.toggle("hidden")}
-function toggleStar(){if(!current)return;let s=stars(),k=key(current);s[k]?delete s[k]:s[k]=true;localStorage.setItem(STAR_KEY,JSON.stringify(s));nextQuestion()}
+function toggleStar(){if(!current)return;let s=stars(),k=key(current);s[k]?delete s[k]:s[k]=true;localStorage.setItem(STAR_KEY,JSON.stringify(s));renderCurrent()}
 function openEditor(){
  if(!current)return;
  editIndex=mine.indexOf(current);
@@ -131,7 +145,7 @@ function saveEditor(){
  let w={jp:$("ejp").value.trim(),r:$("er").value.trim(),m:$("em").value.trim(),ej:$("eej").value.trim(),ec:$("eec").value.trim(),mine:true};
  if(!w.jp||!w.r||!w.m){$("editMsg").textContent="請填寫日文、讀音、中文意思";return}
  if(editIndex>=0){w.level=mine[editIndex].level;mine[editIndex]=w}else{w.level=level(current);mine.push(w)}
- saveMine();rebuild();current=w;nextQuestion();closeEditor()
+ saveMine();rebuild();current=w;renderCurrent();closeEditor()
 }
 function addWord(){
  let v=id=>$(id).value.trim();if(!v("newjp")||!v("newr")||!v("newm")){$("addMsg").textContent="請填寫日文、讀音、中文意思";return}
@@ -147,8 +161,19 @@ function go(p){$("quizPage").classList.toggle("pageHidden",p!=="quiz");$("addPag
 function openCategory(c){$("dbHome").classList.add("pageHidden");$("dbDetail").classList.remove("pageHidden");let list=c==="STAR"?all.filter(isStar):c==="MINE"?mine:all.filter(w=>level(w)===c);$("dbTitle").textContent=(c==="STAR"?"⭐ 收藏":c==="MINE"?"➕ 我的單字":c)+"（"+list.length+"）";$("dbList").innerHTML=list.map(w=>`<div class="word"><b>${esc(w.jp)}</b><span class="r">${esc(w.r)}</span><div class="m">${esc(w.m)}</div></div>`).join("")||'<p class="small">目前沒有資料。</p>'}
 function closeCategory(){$("dbHome").classList.remove("pageHidden");$("dbDetail").classList.add("pageHidden")}
 
+
+function editDatabaseWord(encoded){
+ let k=decodeURIComponent(encoded), w=all.find(x=>key(x)===k);
+ if(!w)return;
+ current=w; editIndex=mine.indexOf(w);
+ $("ejp").value=w.jp||"";$("er").value=w.r||"";$("em").value=w.m||"";
+ $("eej").value=w.ej||"";$("eec").value=w.ec||"";
+ $("editMsg").textContent=editIndex<0?"內建單字會建立成你的自訂版本，不會修改 n5_words.json。":"";
+ $("modalShade").classList.add("open");
+}
+
 fetch("n5_words.json",{cache:"no-store"}).then(r=>{if(!r.ok)throw Error("n5_words.json");return r.json()}).then(d=>{
- builtin=Array.isArray(d)?d:[];let m=parse(localStorage.getItem(MINE_KEY));mine=Array.isArray(m)?m:[];rebuild()
-}).catch(()=>{let m=parse(localStorage.getItem(MINE_KEY));mine=Array.isArray(m)?m:[];rebuild();$("jp").textContent="找不到 n5_words.json";$("reading").textContent="請確認它與 index.html 在同一個資料夾"})
+ builtin=Array.isArray(d)?d:[];mine=loadMine();rebuild()
+}).catch(()=>{mine=loadMine();rebuild();$("jp").textContent="找不到 n5_words.json";$("reading").textContent="請確認它與 index.html 在同一個資料夾"})
 </script>
 </body></html>
