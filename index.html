@@ -28,6 +28,9 @@ h1{font-size:27px;margin:0;color:#f5f6f7}
 .panel label{display:block;color:#c8ccd3;font-weight:700;margin:12px 0 6px}
 input,textarea{width:100%;background:#121418;color:#fff;border:1px solid #383d46;border-radius:12px;padding:12px;font-size:16px}textarea{min-height:70px}
 .row{display:flex;gap:8px}.row button{flex:1}.btn{border:0;border-radius:13px;padding:13px;font-size:16px;font-weight:700}
+.catField{margin-top:12px}.catField select,.catField input{margin-top:6px}
+.resetBtn{flex:0 0 44px;width:44px;height:44px;padding:0;background:#292d34;color:#aeb3bb;border:1px solid #464b55;border-radius:13px;font-size:21px;line-height:1}
+.resetBtn:active{transform:scale(.96)}
 .dark{background:#f1f2f4;color:#111}.light{background:#292d34;color:#fff;border:1px solid #464b55}
 .small,.msg{color:#969eaa;font-size:14px}.item,.word{padding:12px 2px;border-bottom:1px solid #30343b;line-height:1.5}.word b{font-size:18px}.wordTop{display:flex;align-items:center;justify-content:space-between;gap:8px}.wordEdit{background:#292d34;color:#fff;border:1px solid #464b55;border-radius:9px;padding:7px 10px}.word .r{color:#969ca7;margin-left:7px}.word .m{color:#bfc3ca;margin-top:3px}
 .modalShade{position:fixed;inset:0;background:#000b;z-index:30;display:none;align-items:flex-end;justify-content:center}.modalShade.open{display:flex}
@@ -51,7 +54,10 @@ input,textarea{width:100%;background:#121418;color:#fff;border:1px solid #383d46
 <div class="jp" id="jp">載入中…</div><div class="reading" id="reading"></div>
 <div id="answer" class="hidden"><div class="meaning" id="meaning"></div><div class="ex"><div class="ej" id="ej"></div><div class="ec" id="ec"></div></div></div>
 </div>
-<button class="next" onclick="nextQuestion()">下一題</button>
+<div style="display:flex;gap:8px;margin-top:12px">
+<button class="next" style="margin-top:0;flex:1" onclick="nextQuestion()">下一題</button>
+<button class="resetBtn" onclick="resetQuiz()" aria-label="重置測驗" title="重置測驗">↻</button>
+</div>
 </section>
 
 <section id="addPage" class="pageHidden">
@@ -62,9 +68,12 @@ input,textarea{width:100%;background:#121418;color:#fff;border:1px solid #383d46
 <label>日文例句</label><textarea id="newej"></textarea>
 <label>中文例句</label><textarea id="newec"></textarea>
 <button class="btn dark" style="width:100%;margin-top:14px" onclick="addWord()">＋ 加入我的單字</button><div id="addMsg" class="msg"></div></div>
-<div class="panel"><b>💾 我的資料備份</b><p class="small">更新 index.html 不會刪除這裡的資料。</p>
-<div class="row"><button class="btn light" onclick="exportMine()">📤 匯出</button><button class="btn light" onclick="document.getElementById('file').click()">📥 匯入</button></div>
-<input id="file" type="file" accept=".json" style="display:none" onchange="importMine(event)"><div id="backupMsg" class="msg"></div></div>
+<div class="panel"><b>💾 我的資料備份</b>
+<p class="small">完整備份你的單字、分類、⭐星號與測驗進度。更新 index.html 不會刪除這些資料。</p>
+<div class="row"><button class="btn light" onclick="exportBackup()">📤 備份全部</button><button class="btn light" onclick="document.getElementById('file').click()">📥 還原備份</button></div>
+<input id="file" type="file" accept=".json" style="display:none" onchange="importBackup(event)">
+<div class="row" style="margin-top:8px"><button class="btn light" onclick="exportMine()">📤 只備份我的單字</button></div>
+<div id="backupMsg" class="msg"></div></div>
 <div class="panel"><b>我的單字：<span id="total">0</span> 個</b><div id="mineList"></div></div>
 </section>
 
@@ -72,7 +81,9 @@ input,textarea{width:100%;background:#121418;color:#fff;border:1px solid #383d46
 <div id="dbHome"><h2>📚 資料庫</h2>
 <button class="catBtn" onclick="openCategory('N1')">N1 單字</button><button class="catBtn" onclick="openCategory('N2')">N2 單字</button>
 <button class="catBtn" onclick="openCategory('N3')">N3 單字</button><button class="catBtn" onclick="openCategory('N4')">N4 單字</button>
-<button class="catBtn" onclick="openCategory('N5')">N5 單字</button><button class="catBtn" onclick="openCategory('STAR')">⭐ 打星號的單字</button>
+<button class="catBtn" onclick="openCategory('N5')">N5 單字</button>
+<div id="customCats"></div>
+<button class="catBtn" onclick="openCategory('STAR')">⭐ 打星號的單字</button>
 <button class="catBtn" onclick="openCategory('MINE')">➕ 我的單字</button></div>
 <div id="dbDetail" class="pageHidden"><button class="btn light" onclick="closeCategory()">← 返回</button><h2 id="dbTitle"></h2><div id="dbList"></div></div>
 </section>
@@ -87,11 +98,19 @@ input,textarea{width:100%;background:#121418;color:#fff;border:1px solid #383d46
 <div id="modalShade" class="modalShade"><div class="modal"><h2>✎ 編輯單字</h2>
 <label>日文</label><input id="ejp"><label>讀音／假名</label><input id="er"><label>中文意思</label><input id="em">
 <label>日文例句</label><textarea id="eej"></textarea><label>中文例句</label><textarea id="eec"></textarea>
+<div class="catField"><label>單字分類</label>
+<select id="ecat"></select>
+<input id="newcat" placeholder="輸入新分類名稱（可留白）">
+<p class="small">選擇既有分類，或輸入新分類後儲存。新分類會自動出現在資料庫。</p>
+</div>
 <div class="modalActions"><button class="btn light" onclick="closeEditor()">取消</button><button class="btn dark" onclick="saveEditor()">儲存</button></div><div id="editMsg" class="msg"></div>
 </div></div>
 
 <script>
-const MINE_KEY="jpN5MineV2",OLD_MINE_KEY="jpN5Mine",STAR_KEY="jpN5StarsV2";
+const MINE_KEY="jpN5MineV2",OLD_MINE_KEY="jpN5Mine",STAR_KEY="jpN5StarsV2",CAT_KEY="jpN5CategoriesV1";
+function loadCategories(){let c=parse(localStorage.getItem(CAT_KEY));return Array.isArray(c)?c:[]}
+function saveCategories(c){localStorage.setItem(CAT_KEY,JSON.stringify(c))}
+let customCategories=loadCategories();
 function loadMine(){
  let m=parse(localStorage.getItem(MINE_KEY));
  if(Array.isArray(m)) return m;
@@ -105,10 +124,34 @@ const parse=s=>{try{return JSON.parse(s)}catch(e){return null}};
 const key=w=>(w.jp||"")+"|"+(w.r||"");
 const stars=()=>parse(localStorage.getItem(STAR_KEY))||{};
 function isStar(w){return !!stars()[key(w)]}
-function level(w){return w.level||w.n||w.levels||(w.mine?"自訂":"N5")}
+function level(w){return w.category||w.level||w.n||w.levels||(w.mine?"我的單字":"N5")}
+function categories(){
+ let set={};
+ ["N1","N2","N3","N4","N5"].forEach(x=>set[x]=true);
+ customCategories.forEach(x=>{if(x)set[x]=true});
+ all.forEach(w=>{let c=w.category||w.level;if(c&&c!=="N1"&&c!=="N2"&&c!=="N3"&&c!=="N4"&&c!=="N5")set[c]=true});
+ return Object.keys(set);
+}
+function refreshCategorySelect(selected){
+ let opts=categories().map(c=>`<option value="${esc(c)}">${esc(c)}</option>`).join("");
+ $("ecat").innerHTML=opts;
+ if(selected && !categories().includes(selected)){
+   customCategories.push(selected);saveCategories(customCategories);
+   $("ecat").innerHTML+=`<option value="${esc(selected)}">${esc(selected)}</option>`;
+ }
+ $("ecat").value=selected||"N5";
+}
 function saveMine(){localStorage.setItem(MINE_KEY,JSON.stringify(mine));localStorage.setItem(OLD_MINE_KEY,JSON.stringify(mine))}
-function rebuild(){all=builtin.concat(mine);renderMine();applyFilter()}
+function rebuild(){all=builtin.concat(mine);renderMine();renderCustomCategories();refreshQuizFilters();applyFilter()}
+function refreshQuizFilters(){
+ let currentValue=$("filter").value;
+ let base='<option value="ALL">全部單字</option><option value="N1">N1</option><option value="N2">N2</option><option value="N3">N3</option><option value="N4">N4</option><option value="N5">N5</option><option value="STAR">⭐ 打星號的單字</option>';
+ let extra=categories().filter(c=>!/^N[1-5]$/.test(c)).map(c=>`<option value="${esc(c)}">${esc(c)}</option>`).join("");
+ $("filter").innerHTML=base+extra;
+ if(categories().includes(currentValue)||["ALL","N1","N2","N3","N4","N5","STAR"].includes(currentValue))$("filter").value=currentValue;
+}
 function applyFilter(){
+ refreshQuizFilters();
  let f=$("filter").value;
  pool=f==="ALL"?all.slice():f==="STAR"?all.filter(isStar):all.filter(w=>level(w)===f);
  nextQuestion();
@@ -123,13 +166,29 @@ function renderCurrent(){
  $("meaning").textContent=current.m||"";$("ej").textContent=current.ej||"";$("ec").textContent=current.ec||"";
  $("star").textContent=isStar(current)?"★":"☆";$("star").className="star "+(isStar(current)?"on":"");
 }
+function seenKey(){return "jpQuizSeenV1:"+$("filter").value}
+function seenSet(){let a=parse(localStorage.getItem(seenKey()));return new Set(Array.isArray(a)?a:[])}
+function saveSeen(set){localStorage.setItem(seenKey(),JSON.stringify(Array.from(set)))}
+function resetQuiz(){
+ localStorage.removeItem(seenKey());
+ current=null;
+ applyFilter();
+}
 function nextQuestion(){
  $("answer").classList.add("hidden");
- if(!pool.length){current=null;$("jp").textContent="目前沒有符合條件的單字";$("reading").textContent="";$("star").textContent="☆";return}
- let n=pool[Math.floor(Math.random()*pool.length)];
- if(pool.length>1&&n===current)n=pool[Math.floor(Math.random()*pool.length)];
+ if(!pool.length){current=null;renderCurrent();return}
+ let seen=seenSet();
+ let starred=pool.filter(isStar);
+ let unseen=pool.filter(w=>!seen.has(key(w)));
+ let candidates=starred.filter(w=>!seen.has(key(w)));
+ // Starred cards always get priority; after starred unseen cards, continue through unseen cards.
+ if(!candidates.length)candidates=unseen;
+ if(!candidates.length)candidates=starred.length?starred:pool;
+ let n=candidates[Math.floor(Math.random()*candidates.length)];
+ if(pool.length>1&&n===current&&candidates.length>1)n=candidates.find(w=>w!==current)||n;
  current=n;
- renderCurrent()
+ seen.add(key(n));saveSeen(seen);
+ renderCurrent();
 }
 $("card").onclick=()=>{if(current)$("answer").classList.toggle("hidden")}
 function toggleStar(){if(!current)return;let s=stars(),k=key(current);s[k]?delete s[k]:s[k]=true;localStorage.setItem(STAR_KEY,JSON.stringify(s));renderCurrent()}
@@ -138,14 +197,19 @@ function openEditor(){
  editIndex=mine.indexOf(current);
  $("ejp").value=current.jp||"";$("er").value=current.r||"";$("em").value=current.m||"";$("eej").value=current.ej||"";$("eec").value=current.ec||"";
  $("editMsg").textContent=editIndex<0?"內建單字會建立成你的自訂版本，不會修改 n5_words.json。":"";
+ refreshCategorySelect(current.category||level(current));$("newcat").value="";
  $("modalShade").classList.add("open");
 }
 function closeEditor(){$("modalShade").classList.remove("open")}
 function saveEditor(){
- let w={jp:$("ejp").value.trim(),r:$("er").value.trim(),m:$("em").value.trim(),ej:$("eej").value.trim(),ec:$("eec").value.trim(),mine:true};
+ let cat=$("ecat").value;
+ let newCat=$("newcat").value.trim();
+ if(newCat)cat=newCat;
+ if(newCat&&!customCategories.includes(newCat)){customCategories.push(newCat);saveCategories(customCategories)}
+ let w={jp:$("ejp").value.trim(),r:$("er").value.trim(),m:$("em").value.trim(),ej:$("eej").value.trim(),ec:$("eec").value.trim(),mine:true,category:cat};
  if(!w.jp||!w.r||!w.m){$("editMsg").textContent="請填寫日文、讀音、中文意思";return}
- if(editIndex>=0){w.level=mine[editIndex].level;mine[editIndex]=w}else{w.level=level(current);mine.push(w)}
- saveMine();rebuild();current=w;renderCurrent();closeEditor()
+ if(editIndex>=0){mine[editIndex]=w}else{mine.push(w)}
+ saveMine();rebuild();current=w;renderCurrent();refreshCategorySelect(cat);$("newcat").value="";closeEditor()
 }
 function addWord(){
  let v=id=>$(id).value.trim();if(!v("newjp")||!v("newr")||!v("newm")){$("addMsg").textContent="請填寫日文、讀音、中文意思";return}
@@ -153,12 +217,67 @@ function addWord(){
  ["newjp","newr","newm","newej","newec"].forEach(id=>$(id).value="");$("addMsg").textContent="✅ 已儲存"
 }
 function renderMine(){$("total").textContent=mine.length;$("mineList").innerHTML=mine.map(w=>`<div class="word"><b>${esc(w.jp)}</b><span class="r">${esc(w.r)}</span><div class="m">${esc(w.m)}</div></div>`).join("")||'<p class="small">還沒有自己新增的單字。</p>'}
+
+function exportBackup(){
+ let seen={};
+ for(let i=0;i<localStorage.length;i++){
+  let k=localStorage.key(i);
+  if(k&&k.indexOf("jpQuizSeenV1:")===0)seen[k]=parse(localStorage.getItem(k))||[];
+ }
+ let data={
+  version:1,
+  exportedAt:new Date().toISOString(),
+  mine:mine,
+  categories:customCategories,
+  stars:stars(),
+  quizSeen:seen
+ };
+ let blob=new Blob([JSON.stringify(data,null,2)],{type:"application/json"});
+ let a=document.createElement("a");
+ a.href=URL.createObjectURL(blob);
+ a.download="japanese_word_backup.json";
+ a.click();
+ setTimeout(()=>URL.revokeObjectURL(a.href),1000);
+ $("backupMsg").textContent="✅ 完整備份已建立";
+}
+function importBackup(e){
+ let f=e.target.files&&e.target.files[0];if(!f)return;
+ let r=new FileReader();
+ r.onload=()=>{
+  let d=parse(r.result);
+  if(!d||!Array.isArray(d.mine)){
+   $("backupMsg").textContent="❌ 這不是有效的完整備份檔";
+   return;
+  }
+  if(!confirm("還原備份會以備份內容取代目前的自訂資料、分類、星號與測驗進度。內建 n5_words.json 不會被修改。確定要還原嗎？"))return;
+  mine=d.mine.filter(w=>w&&w.jp);
+  customCategories=Array.isArray(d.categories)?d.categories.filter(Boolean):[];
+  saveMine();
+  saveCategories(customCategories);
+  localStorage.setItem(STAR_KEY,JSON.stringify(d.stars||{}));
+  Object.keys(localStorage).filter(k=>k.indexOf("jpQuizSeenV1:")===0).forEach(k=>localStorage.removeItem(k));
+  if(d.quizSeen&&typeof d.quizSeen==="object"){
+   Object.keys(d.quizSeen).forEach(k=>{
+    if(Array.isArray(d.quizSeen[k]))localStorage.setItem(k,JSON.stringify(d.quizSeen[k]));
+   });
+  }
+  rebuild();
+  $("backupMsg").textContent="✅ 備份還原完成";
+  e.target.value="";
+ };
+ r.readAsText(f,"utf-8");
+}
 function exportMine(){let b=new Blob([JSON.stringify(mine,null,2)],{type:"application/json"}),a=document.createElement("a");a.href=URL.createObjectURL(b);a.download="my_japanese_words.json";a.click()}
 function importMine(e){let f=e.target.files[0];if(!f)return;let r=new FileReader();r.onload=()=>{let d=parse(r.result);if(!Array.isArray(d)){ $("backupMsg").textContent="❌ 格式錯誤";return}mine=mine.concat(d.filter(w=>w&&w.jp));saveMine();rebuild();$("backupMsg").textContent="✅ 匯入完成，原有資料保留"};r.readAsText(f,"utf-8")}
 function openDrawer(){$("drawer").classList.add("open");$("shade").classList.add("open")}
 function closeDrawer(){$("drawer").classList.remove("open");$("shade").classList.remove("open")}
 function go(p){$("quizPage").classList.toggle("pageHidden",p!=="quiz");$("addPage").classList.toggle("pageHidden",p!=="add");$("dbPage").classList.toggle("pageHidden",p!=="db");closeDrawer();if(p==="add")renderMine();if(p==="db"){ $("dbHome").classList.remove("pageHidden");$("dbDetail").classList.add("pageHidden")}}
-function openCategory(c){$("dbHome").classList.add("pageHidden");$("dbDetail").classList.remove("pageHidden");let list=c==="STAR"?all.filter(isStar):c==="MINE"?mine:all.filter(w=>level(w)===c);$("dbTitle").textContent=(c==="STAR"?"⭐ 收藏":c==="MINE"?"➕ 我的單字":c)+"（"+list.length+"）";$("dbList").innerHTML=list.map(w=>`<div class="word"><b>${esc(w.jp)}</b><span class="r">${esc(w.r)}</span><div class="m">${esc(w.m)}</div></div>`).join("")||'<p class="small">目前沒有資料。</p>'}
+function renderCustomCategories(){
+ $("customCats").innerHTML=categories().filter(c=>!/^N[1-5]$/.test(c)).map(c=>`<button class="catBtn" onclick="openCategory('${encodeURIComponent(c)}')">${esc(c)} 單字</button>`).join("");
+}
+function openCategory(c){
+ c=decodeURIComponent(c);
+ $("dbHome").classList.add("pageHidden");$("dbDetail").classList.remove("pageHidden");let list=c==="STAR"?all.filter(isStar):c==="MINE"?mine:all.filter(w=>level(w)===c);$("dbTitle").textContent=(c==="STAR"?"⭐ 收藏":c==="MINE"?"➕ 我的單字":c)+"（"+list.length+"）";$("dbList").innerHTML=list.map(w=>`<div class="word"><b>${esc(w.jp)}</b><span class="r">${esc(w.r)}</span><div class="m">${esc(w.m)}</div></div>`).join("")||'<p class="small">目前沒有資料。</p>'}
 function closeCategory(){$("dbHome").classList.remove("pageHidden");$("dbDetail").classList.add("pageHidden")}
 
 
@@ -169,6 +288,7 @@ function editDatabaseWord(encoded){
  $("ejp").value=w.jp||"";$("er").value=w.r||"";$("em").value=w.m||"";
  $("eej").value=w.ej||"";$("eec").value=w.ec||"";
  $("editMsg").textContent=editIndex<0?"內建單字會建立成你的自訂版本，不會修改 n5_words.json。":"";
+ refreshCategorySelect(current.category||level(current));$("newcat").value="";
  $("modalShade").classList.add("open");
 }
 
